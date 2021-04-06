@@ -1,0 +1,88 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-analytics.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    var firebaseConfig = {
+      apiKey: "AIzaSyB1gProVLbu5cTJFZgCXz5qX1ckeno-f9s",
+      authDomain: "task-dispencer.firebaseapp.com",
+      databaseURL: "https://task-dispencer-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "task-dispencer",
+      storageBucket: "task-dispencer.appspot.com",
+      messagingSenderId: "1021029715894",
+      appId: "1:1021029715894:web:af1096f3633ad27d5bbb17",
+      measurementId: "G-RLBR93SMMN"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
+
+</head>
+
+<body>
+  <div class="login_container">
+    <h1 style="margin: 0 0 20px 0;">Register</h1>
+    <img class="avatar_img" src="https://github.com/mdo.png">
+    <div class="register_fields_row">
+      <div class="register_fields_columns">
+        <input type="text" autocomplete="team" id="team" name="team" placeholder="Team"></input>
+        <input type="text" id="job_title" name="job_title" placeholder="Job Title"></input>
+      </div>
+      <div class="register_fields_columns">
+        <input type="text" autocomplete="given-name" id="first_name" name="fname" placeholder="First name"></input>
+        <input type="text" autocomplete="family-name" id="last_name" name="lname" placeholder="Last name"></input>
+      </div>
+      <div class="register_fields_columns">
+        <input type="email" autocomplete="email" id="email" name="email" placeholder="Email"></input>
+        <input type="text" autocomplete="bday" id="birthday" name="birthday" placeholder="Birthday"></input>
+      </div>
+      <div class="register_fields_columns">
+        <input type="password" autocomplete="password" id="password" name="password" placeholder="Password"></input>
+        <input type="cpassword" autocomplete="password" id="cpassword" name="cpassword" placeholder="Confirm Password"></input>
+      </div>
+      <div class="register_fields_columns apply_manager">
+          <input type="checkbox" id="checkbox" name="checkbox" style="margin-right: 20px; width: 30px; height: 40px"></input>
+          <label style="white-space:nowrap;">Apply for manager</label>
+        <span style="width:55px;"></span>
+        <div class="admin">
+          <input type="password" id="admin_code" name="admin_code" placeholder="Code" ></input>
+        </div>
+      </div>
+      <div class="register_fields_row choose_skills">
+        <input type="text" id="search_skills" name="search_skills" placeholder="Search For Skills"></input>
+        <div class="selected_skills">
+          <div class="skill">
+            <p>This is my first skill.</p>
+            <button name="button">X</button>
+          </div>
+          <div class="skill">
+            <p>This is my second skill.</p>
+            <button name="button">X</button>
+          </div>
+          <div class="skill">
+            <p>This is my third skill.</p>
+            <button name="button">X</button>
+          </div>
+          <div class="skill">
+            <p>This is my forth skill.</p>
+            <button name="button">X</button>
+          </div>
+        </div>
+      </div>
+    <button class="button" type="submit" value="Register">Register</button>
+  </div>
+  </div>
+</div>
+</body>
+</html>
