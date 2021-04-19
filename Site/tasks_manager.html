@@ -38,7 +38,7 @@
     <div class="menu_buttons">
       <div class="button"><a>
         <svg class="search_button" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-        viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+        viewBox="0 0 512 512" style="enable-background:new 0 0 512 512; height: 20px;" xml:space="preserve">
         <g>
           <g>
             <path d="M503.847,432.949l-89.897-89.897c-0.002-0.002-0.003-0.003-0.006-0.006s-0.003-0.003-0.006-0.006l-32.135-32.135
@@ -61,6 +61,9 @@
       </svg>
       Search
     </a></div>
+      <div class="button" id="add_task"><a>
+        + Add new task
+      </a></div>
   </div>
   <hr>
   <div class="avatar">
@@ -70,6 +73,7 @@
     </a>
   </div>
 </div>
+
 <div class="good_space">
   <div class="available_tasks">
     <div class="task">
@@ -89,5 +93,14 @@
     </div>
   </div>
 </div>
+  <div id="add_new_ask" class="add_new_ask">
+    <div class="add_new_ask-container">
+      <span class="close">&times;</span>
+      <p>Lable 1</p>
+      <input type="password" autocomplete="password" id="password" name="password" placeholder="Password"></input>
+      <input type="password" autocomplete="password" id="password" name="password" placeholder="Password"></input>
+      <button type="submit" value="Add Task">Add Task</button>
+    </div>
+  <script src="javascript/task_manager.js"></script>
 </body>
 </html>

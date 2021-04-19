@@ -12,6 +12,11 @@ body {
   font-family: archivo_blackregular;
 }
 
+a:any-link {
+  text-decoration: none;
+  color: black;
+}
+
 .good_space {
   position: fixed;
   top: 0px;
@@ -26,9 +31,6 @@ body {
   flex-wrap: wrap;
   flex-direction: column!important;
   list-style: none;
-  background-color:
-  color: white;
-  fill: #212529;
 
 }
 
@@ -57,12 +59,39 @@ body {
   text-align: center;
 }
 
+.dropdown-menu {
+  display: none;
+  color:#dee2e6;
+  background-color: #343a40;
+  z-index: 1000;
+  padding: 1rem 0;
+  text-align: left;
+  list-style: none;
+  box-sizing: border-box;
+  position: absolute;
+  left: 0px;
+  top: auto;
+  margin: 0px;
+  right: auto;
+  bottom: 0px;
+  transform: translate(50%, -80%);
+  width: 50%;
+}
+
+.dropdown-menu_show {
+  display: block!important;
+}
+
+.dropdown-item {
+  font-family: "Helvetica Neue";
+}
+
 .avatar p {
   font-size: 1rem;
 }
 
 .avatar a {
-  font-family: archivo_blackregular;
+  /*font-family: archivo_blackregular;*/
   color: #fff;
   text-decoration: none;
   display: flex;
@@ -131,7 +160,7 @@ body {
   align-items: center;
 }
 
-.calendar_hours_days:last-child {
+.calendar_hours_days:last-of-type {
   border-right: none;
 }
 
@@ -174,14 +203,95 @@ body {
   font-family: archivo_blackregular;
 }
 
+.center {
+  /*display: flex;*/
+  /*justify-content: center;*/
+  /*align-items: center;*/
+
+}
+
+.index_container {
+  background-color: #2A9D8F;
+  text-align: center;
+  position: fixed;
+  margin: 0 auto;
+  top: 50%;
+  /*bottom: auto;*/
+  left: 50%;
+  margin: -202px 0 0 -213px;
+  /*right: auto;*/
+  /*transform: translate(-50%, -50%);*/
+  padding: 50px;
+}
+
 .login_container {
   background-color: #2A9D8F;
   text-align: center;
   position: fixed;
+  margin: 0 auto;
   top: 50%;
+  /*bottom: auto;*/
   left: 50%;
+  margin: -202px 0 0 -213px;
+  /*right: auto;*/
+  /*transform: translate(-50%, -50%);*/
+  padding: 50px;
+}
+
+.register_container {
+  background-color: #2A9D8F;
+  text-align: center;
+  position: fixed;
+  margin: 0 auto;
+  top: 50%;
+  /*bottom: auto;*/
+  left: 50%;
+  /*margin: -202px 0 0 -213px;*/
+  /*right: auto;*/
   transform: translate(-50%, -50%);
   padding: 50px;
+}
+
+.animation {
+  animation:animName 2s linear .5;
+  /*transition: 1s;*/
+  opacity: 0;
+  z-index: -1;
+  /*  background-color: #212529;*/
+}
+
+.animation_inverse {
+  animation:animName_inverse 2s linear .5;
+  opacity: 1;
+  z-index: 1;
+  /*  background-color: #212529;*/
+}
+
+@keyframes animName {
+  0%{
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: rotateY(360deg);
+    opacity: 0;
+  }
+  100%{
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes animName_inverse {
+  0%{
+    transform: rotateY(360deg);
+    opacity: 0;
+  }
+  50% {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  100%{
+    opacity: 1;  }
 }
 
 .preferences_container {
@@ -227,6 +337,14 @@ body {
 
 .login_form {
   margin: 10px;
+}
+.login_form a {
+  color: white;
+}
+
+.button_form {
+  margin: 10px;
+  display: flex;
 }
 
 .avatar_img {
@@ -350,7 +468,69 @@ input {
  button {
    width: 50%;
    height: 50px;
+   margin-bottom: 20px;
+   background-color: white;
+   fill: #212529;
  }
+
+.button {
+  color: #212529;
+}
+
+.add_new_ask {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.add_new_ask-container {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+}
+.add_new_ask-container input{
+  width: 100%;
+}
+
+.add_new_ask-container button {
+  background-color: #343a40;
+  color: white;
+  margin: 10px;
+  padding: 10px 10px 10px 10px;
+  text-transform: uppercase;
+  font-family: archivo_blackregular;
+  cursor: pointer;
+  margin-left: 50%;
+  transform: translate(-50%, 0px);
+
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
 
 h1 {
   margin-bottom: 50px;
