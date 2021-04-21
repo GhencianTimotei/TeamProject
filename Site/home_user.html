@@ -8,27 +8,12 @@
   <meta name="description" content="The HTML5 Herald">
   <meta name="author" content="SitePoint">
   <link rel="stylesheet" href="css/styles.css">
-  <link href="css/Bootstrap/bootstrap.min.css" rel="stylesheet">
 
   <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-analytics.js"></script>
-  <script>
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    var firebaseConfig = {
-      apiKey: "AIzaSyB1gProVLbu5cTJFZgCXz5qX1ckeno-f9s",
-      authDomain: "task-dispencer.firebaseapp.com",
-      databaseURL: "https://task-dispencer-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "task-dispencer",
-      storageBucket: "task-dispencer.appspot.com",
-      messagingSenderId: "1021029715894",
-      appId: "1:1021029715894:web:af1096f3633ad27d5bbb17",
-      measurementId: "G-RLBR93SMMN"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-  </script>
 
 </head>
 
@@ -65,99 +50,89 @@
   </div>
   <hr>
   <div class="avatar">
-    <a href="#">
-      <img id="avatar_img" src="https://github.com/mdo.png">
-      <p id="avatar_name">Test Name</p>
+    <a href = "#" class="dropdown-toggle" id="dropdownUser1">
+      <img id="avatar_img" src="assets/generic-user.png">
+      <p id="avatar_name"></p>
     </a>
+    <ul class="dropdown-menu" id="dropdown-menu">
+      <li><a class="dropdown-item" href="">Profile</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" id="signOut_button" href="#">Sign out</a></li>
+    </ul>
   </div>
 </div>
 <div class="calendar_days_container">
-  <div class="calendar_days">
-    <h1>1</h1>
-    <p>Mar</p>
+  <div class="btn">
+    <a href="#" class="material-icons left_button" id="left_button">chevron_left</a>
+  </div>
+  <div class="btn">
+    <a href="#" class="material-icons right_button" id="right_button">chevron_right</a>
   </div>
   <div class="calendar_days">
-    <h1>2</h1>
-    <p>Mar</p>
+    <h1 class="week_day_name">Monday</h1>
+    <p class="week_day_date">Month</p>
   </div>
   <div class="calendar_days">
-    <h1>3</h1>
-    <p>Mar</p>
+    <h1 class="week_day_name">Tuesday</h1>
+    <p class="week_day_date">Month</p>
   </div>
   <div class="calendar_days">
-    <h1>4</h1>
-    <p>Mar</p>
+    <h1 class="week_day_name">Wednesday</h1>
+    <p class="week_day_date">Month</p>
   </div>
   <div class="calendar_days">
-    <h1>5</h1>
-    <p>Mar</p>
+    <h1 class="week_day_name">Thursday</h1>
+    <p class="week_day_date">Month</p>
   </div>
   <div class="calendar_days">
-    <h1>6</h1>
-    <p>Mar</p>
+    <h1 class="week_day_name">Friday</h1>
+    <p class="week_day_date">Month</p>
   </div>
   <div class="calendar_days">
-    <h1>7</h1>
-    <p>Mar</p>
+    <h1 class="week_day_name">Saturday</h1>
+    <p class="week_day_date">Month</p>
+  </div>
+  <div class="calendar_days">
+    <h1 class="week_day_name">Sunday</h1>
+    <p class="week_day_date">Month</p>
   </div>
 </div>
 <div class="calendar_hours_container">
   <div class="calendar_hours_days">
     <div class="calendar_hours">
-      <p id="hour_label">00:00</p>
-      <p id="task_label">Task 1</p>
+      <p>00:00</p>
+      <p class="task_label">Task 1</p>
     </div>
     <div class="calendar_hours">
-      <p id="hour_label">01:00</p>
-      <p id="task_label">Task 1</p>
+      <p>01:00</p>
+      <p class="task_label">Task 1</p>
     </div>
     <div class="calendar_hours">
-      <p id="hour_label">02:00</p>
-      <p id="task_label">Task 1</p>
+      <p>02:00</p>
+      <p class="task_label">Task 1</p>
     </div>
   </div>
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <span></span>
-      <p>Task 1</p>
-    </div>
+
   </div>
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <span></span>
-      <p>Task 1</p>
-    </div>
+
   </div>
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <span></span>
-      <p>Task 1</p>
-    </div>
+
   </div>
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <span></span>
-      <p>Task 1</p>
-    </div>
+
   </div>
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <span></span>
-      <p>Task 1</p>
-    </div>
+
   </div>
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <span></span>
-      <p>Task 1</p>
-    </div>
+
   </div>
+  <script src="javascript/sidebars.js"></script>
+  <script src="javascript/home_user.js"></script>
 </div>
+
 </body>
 </html>
