@@ -33,10 +33,12 @@ body {
   font-family: archivo_blackregular;
 }
 
+
 /*a:any-link {*/
 /*  text-decoration: none;*/
 /*  color: black;*/
 /*}*/
+
 
 .good_space {
   position: fixed;
@@ -546,6 +548,7 @@ input {
   transform: translate(-50%, 0px);
 
 }
+
 
 .left_button {
   width: 40px;
