@@ -33,12 +33,10 @@ body {
   font-family: archivo_blackregular;
 }
 
-
 /*a:any-link {*/
 /*  text-decoration: none;*/
 /*  color: black;*/
 /*}*/
-
 
 .good_space {
   position: fixed;
@@ -386,12 +384,26 @@ body {
   height: 35%;
 }
 
-.register_fields_row {
+.register_fieldsrow_ {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 18px;
+}
+
+.row {
+  margin: 20px 20px 0px 20px;
+  display: flex;
+  flex-direction: row;
+  /*align-items: center;*/
+}
+
+#task_description {
+  height: 100px;
+  width: 100%;
+  border: 1px solid rgba(0,0,0,.2);
+  overflow: scroll;
 }
 
 .register_fields_row button {
@@ -509,7 +521,7 @@ input {
   color: #212529;
 }
 
-.add_new_ask {
+.add_new_task {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
@@ -523,7 +535,7 @@ input {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-.add_new_ask-container {
+.add_new_task-container {
   background-color: #fefefe;
   margin: auto;
   padding: 20px;
@@ -532,11 +544,11 @@ input {
   display: flex;
   flex-direction: column;
 }
-.add_new_ask-container input{
+.add_new_task-container input{
   width: 100%;
 }
 
-.add_new_ask-container button {
+.add_new_task-container button {
   background-color: #343a40;
   color: white;
   margin: 10px;
@@ -549,6 +561,50 @@ input {
 
 }
 
+.add_new_task_row {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+}
+.autocomplete-items {
+  position: absolute;
+  /*transform: translate(0px, 30px);*/
+  width: 328px;
+  z-index: 1;
+  text-align: center;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+.autocomplete-active {
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+.add_new_task_columns {
+  margin: 10px 10px 10px 10px;
+  display: flex;
+  align-items: left;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.add_new_task_columns input {
+  font-size: 15px;
+}
+
+.add_new_task_columns input:last-child {
+  margin-left: 10px;
+}
 
 .left_button {
   width: 40px;
