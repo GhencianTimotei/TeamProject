@@ -9,26 +9,15 @@
   <meta name="author" content="SitePoint">
   <link rel="stylesheet" href="css/styles.css">
   <link href="css/Bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/calendar_style.css">
 
   <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-analytics.js"></script>
-  <script>
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    var firebaseConfig = {
-      apiKey: "AIzaSyB1gProVLbu5cTJFZgCXz5qX1ckeno-f9s",
-      authDomain: "task-dispencer.firebaseapp.com",
-      databaseURL: "https://task-dispencer-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "task-dispencer",
-      storageBucket: "task-dispencer.appspot.com",
-      messagingSenderId: "1021029715894",
-      appId: "1:1021029715894:web:af1096f3633ad27d5bbb17",
-      measurementId: "G-RLBR93SMMN"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-  </script>
+  <script src="javascript/autocomplete.js"></script>
+
 </head>
 
 <body>
@@ -93,14 +82,56 @@
     </div>
   </div>
 </div>
-  <div id="add_new_ask" class="add_new_ask">
-    <div class="add_new_ask-container">
+  <div id="add_new_task" class="add_new_task">
+    <div class="add_new_task-container">
       <span class="close">&times;</span>
-      <p>Lable 1</p>
-      <input type="password" autocomplete="password" id="password" name="password" placeholder="Password"></input>
-      <input type="password" autocomplete="password" id="password" name="password" placeholder="Password"></input>
-      <button type="submit" value="Add Task">Add Task</button>
+      <p>Create a new task</p>
+      <div class="row">
+        <input style="margin-right: 30px;" type="text" id="task_title" name="task_title" placeholder="Task Title"></input>
+        <div class="calendar_container">
+          <input readonly="true" type="date" id="deadline_input" name="deadline_input" placeholder="Deadline"></input>
+          <div class="calendar">
+            <div class="calendar-header">
+              <span class="month-picker" id="month-picker">February</span>
+              <div class="year-picker">
+                <span class="year-change" id="prev-year">
+                    <pre><</pre>
+                </span>
+                <span id="year">2021</span>
+                <span class="year-change" id="next-year">
+                    <pre>></pre>
+                </span>
+              </div>
+            </div>
+            <div class="calendar-body">
+              <div class="calendar-week-day">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+              </div>
+              <div class="calendar-days"></div>
+            </div>
+            <div class="month-list"></div>
+          </div>
+
+          <script src="javascript/calendar_javascript.js"></script>
+        </div>
+
+      </div>
+      <div class="row">
+        <textarea id="task_description" name="task_description" placeholder="Task Description"></textarea>
+      </div>
+      <div class="row">
+        <div style="width: 100%; margin-right: 40px;"><input  type="text" id="skills_necessary" name="skills_necessary" placeholder="Skills necessary"></input></div>
+        <div style="width: 100%;"><input type="text" id="responsible_user" name="responsible_user" placeholder="Responsible user"></input></div>
+      </div>
+      <button type="submit" value="Add Task" id="submit_add_task">Add Task</button>
     </div>
   <script src="javascript/task_manager.js"></script>
+  </div>
 </body>
 </html>
