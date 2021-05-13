@@ -1,4 +1,5 @@
 
+
 var popup = document.getElementById("add_new_task");
 var btn = document.getElementById("add_task");
 var span = document.getElementsByClassName("close")[0];
@@ -9,11 +10,13 @@ var task_title = document.getElementById("task_title");
 var task_description = document.getElementById("task_description");
 var skills_necessary = document.getElementById("skills_necessary");
 var responsible_user = document.getElementById("responsible_user");
-
+var hours_necessary = document.getElementById("hours_necessary");
+var task_priority = document.getElementById("browser");
+var dropDown = document.getElementById("browser");
+var user_uid;
 var listOfSkills = [];
-var user_name = [];
-var user_uid = [];
-var selected_user = "";
+var employees = [];
+var employee_name = [];
 
 var deadline_date = {day: 0, month: 0, year: 0};
 
@@ -30,6 +33,22 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+//generate random number
+function randomIntFromInterval(max) {
+    return Math.floor(Math.random() * max);
+}
+
+// return index of element by uid
+function getIndexOfElement(users, uid) {
+    for (let user in users) {
+
+        if (users[user]["uid"] === uid)
+            return user;
+    }
+    return -1;
+}
+
+//get list of skills
 firebase.database().ref().child("skill").get().then((snapshot) => {
     if (snapshot.exists()) {
         listOfSkills = snapshot.val();
@@ -38,32 +57,71 @@ firebase.database().ref().child("skill").get().then((snapshot) => {
         console.log("No data available");
     }
 });
+//setUserName, setAvatarImage and get user uid
+function setUserName() {
+    const authRef = firebase.auth().currentUser;
+    user_uid = authRef.uid;
+    firebase.storage().ref().child("users_avatar").child(authRef.photoURL).getDownloadURL().then((url) => {
+        document.getElementById("avatar_img").src = url;
+    });
+    document.getElementById("avatar_name").innerText = authRef.displayName;
+}
 
+//get list of employee from manager's teams && start autocomplete
+function getTeamMembers() {
+    var employee_uid = [];
+    var ref = firebase.database().ref()
+    ref.get().then((snapshot) => {
 
-firebase.database().ref().child("users").get().then((snapshot) => {
-    if (snapshot.exists()) {
-        snapshot.forEach(function(user) {
-            user_name.push(user.key);
-            user_name.push(user.val()["first_name"] + " " + user.val()["last_name"]);
-        });
+        if(snapshot.val()["teams"] != null) {
+            let teams = snapshot.val()["teams"]
+            for( let val in teams){
+                if (teams[val]["manager"][0] === user_uid) {
+                    teams[val]["team"].forEach(function (user) {
+                        employee_uid.push(user);
+                        console.log(user)
+                    })
+                }
+            }
+        }
+        else {
+            console.log("No data available");
+        }
+        if(snapshot.val()["users"] != null) {
 
+            employee_uid.forEach(function (employee_uid) {
+                if(snapshot.val()["users"][employee_uid] != null) {
+                    let user = snapshot.val()["users"][employee_uid]
+                    var user_information = {
+                        first_name: user["first_name"],
+                        last_name: user["last_name"],
+                        skills: user["skills"],
+                        uid: employee_uid
+                    };
+                    employee_name.push(user_information["first_name"] + " " + user_information["last_name"]);
+                    employees.push(user_information);
+                }
+            })
+            autocomplete(document.getElementById("responsible_user"), employee_name);
+        }
+        else {
+            console.log("No data available");
+        }
+    });
 
-        // snapshot.on('first_name', s => console.log(s));
-        // listOfSkills = snapshot.val();
-        autocomplete(document.getElementById("responsible_user"), user_name);
-    } else {
-        console.log("No data available");
-    }
-});
+}
 
+// var team1 = {name: "Team 2", manager: ["yajBqtvRL0Vba1rWuQjE6qUoiiF3"], team: ["1MEOm9IUkbd9d9xYfRqKPLaYSyz2", "30ARXYU17ASMkG230yvJEtjwV7A3"]};
+// var teams = firebase.database().ref().child("teams")
+// teams.push().set(team1)
 
 
 
 //Verify user's login status
 firebase.auth().onAuthStateChanged(firebaseUser => {
     if(firebaseUser) {
-        // setUserName();
-
+        setUserName();
+        getTeamMembers();
         // window.location.href = "home_user.html";
     } else {
         window.location.href = "login.html";
@@ -91,6 +149,20 @@ window.onclick = function(event) {
     }
 };
 
+
+dropDown.onchange= function () {
+    if (dropDown.value === "Priority 0") {
+        dropDown.setAttribute("class", "prio0");
+    } else if (dropDown.value === "Priority 1") {
+        dropDown.setAttribute("class", "prio1");
+    } else if (dropDown.value === "Priority 2") {
+        dropDown.setAttribute("class", "prio2");
+    } else if (dropDown.value === "Priority 3") {
+        dropDown.setAttribute("class", "prio3");
+    }
+};
+
+
 window.onclick = function(e) {
     var day = "";
     var month = "";
@@ -108,12 +180,439 @@ window.onclick = function(e) {
     }
 };
 
+
+function addNewTaskByMovingOther(date, task) { /////////////////////////////////////////////////////////////////////////////////////// continue implementation for saving task
+    console.log(date)
+    let selected_user = task["responsible_user"];
+    var auxDate = date;
+    firebase.database().ref().child("tasks").get().then((snapshot) => {
+        if(snapshot.val()["progress"][selected_user] != null) {
+            if (snapshot.val()["progress"][selected_user][Math.floor(date/1000)]) {
+                var task_details = {};
+                while(snapshot.val()["progress"][selected_user][Math.floor(auxDate/1000)] != null) {
+                    task_details[Math.floor(auxDate/1000)] = snapshot.val()["progress"][selected_user][Math.floor(auxDate/1000)];
+                    auxDate.setHours(auxDate.getHours() >= 16 ? 9 : auxDate.getHours() < 9 ? 9 : auxDate.getHours() + 1);
+                }
+                console.log(task_details)
+
+            } else {
+                task["start_time"] =  Math.floor(date/1000);
+                var key = firebase.database().ref().child("tasks/details").push().key;
+                firebase.database().ref().child("tasks/details/" + key).set(task);
+                taskSchedule = {}
+                console.log(task["no_hours_to_work"])
+                for (var i = 0; i < parseInt(task["no_hours_to_work"]); i++) {
+                    taskSchedule[Math.floor(date/1000)] = key;
+                    if (auxDate.getHours() >= 16) {
+                        auxDate.setHours(auxDate.getHours() + 24)
+                        auxDate.setHours(9);
+                    } else if(auxDate.getHours() < 9) {
+                        auxDate.setHours(9);
+                    } else {
+                        auxDate.setHours(auxDate.getHours() + 1);
+                    }
+                }
+                for(i in taskSchedule) {
+                    firebase.database().ref().child("tasks/progress/"+selected_user+"/"+i).set(taskSchedule[i]);
+                }
+            }
+        } else {
+            task["start_time"] =  Math.floor(date/1000);
+            var key = firebase.database().ref().child("tasks/details").push().key;
+            firebase.database().ref().child("tasks/details/" + key).set(task);
+            taskSchedule = {}
+            console.log(task["no_hours_to_work"])
+            for (var i = 0; i < parseInt(task["no_hours_to_work"]); i++) {
+                taskSchedule[Math.floor(date/1000)] = key;
+                if (auxDate.getHours() >= 16) {
+                    auxDate.setHours(auxDate.getHours() + 24)
+                    auxDate.setHours(9);
+                } else if(auxDate.getHours() < 9) {
+                    auxDate.setHours(9);
+                } else {
+                    auxDate.setHours(auxDate.getHours() + 1);
+                }
+            }
+
+            firebase.database().ref().child("tasks/progress/"+selected_user).set(taskSchedule);
+
+        }
+    });
+}
+
 submit_button.onclick = function () {
-    let task = {task_title: task_title.value, task_description: task_description.value, deadline_date: deadline_date, responsible_user:responsible_user.value, necessary_skills: skills_necessary.value};
-    let ref = firebase.database().ref().child("tasks");
-    ref.push().set(task);
+    var priority = 0;
+    let necessary_skills = [skills_necessary.value]
+    switch (dropDown.value) {
+        case "Priority 0":
+            priority = 0;
+            break;
+        case "Priority 1":
+            priority = 1;
+            break;
+        case "Priority 2":
+            priority = 2;
+            break;
+        case "Priority 3":
+            priority = 3;
+            break;
+        default:
+            priority = 3;
+            break;
+    }
+    var task = {task_title: task_title.value,
+        task_description: task_description.value,
+        deadline_date: deadline_date,
+        responsible_user:responsible_user.value,
+        necessary_skills: necessary_skills,
+        no_hours_to_work: hours_necessary.value,
+        priority: priority};
+
+    var best_user = employees;
+
+    //remove users without necessary skills
+    for (let skill in task["necessary_skills"]) {
+        var dismissed_users = []
+        best_user.forEach(function (t) {
+            if (!t["skills"].includes(task["necessary_skills"][skill])) {
+                dismissed_users.push(t["uid"])
+                // console.log(dismissed_users)
+            }
+        })
+        dismissed_users.forEach(function (user) {
+            best_user.splice(getIndexOfElement(best_user, user), 1);
+        })
+    }
+    var found = false;
+    var selected_user = "";
+
+    firebase.database().ref().child("tasks").get().then((snapshot) => {
+        while(!found) {
+            selected_user = best_user[randomIntFromInterval(best_user.length)]
+            var currentDate = new Date();currentDate.setSeconds(0);currentDate.setMinutes(0);
+            var auxDate = new Date();auxDate.setSeconds(0);auxDate.setMinutes(0);
+            if (auxDate.getHours() >= 16) {
+                auxDate.setHours(auxDate.getHours() + 24)
+                auxDate.setHours(9);
+            } else if(auxDate.getHours() < 9) {
+                auxDate.setHours(9);
+            } else {
+                auxDate.setHours(auxDate.getHours() + 1);
+            }
+            console.log(best_user)
+            console.log(selected_user)
+            task["responsible_user"] = selected_user["uid"];
+            if(snapshot.val()["progress"][selected_user["uid"]] != null) {
+                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(currentDate/1000)] != null) { //Task t exists
+                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] != null) { //Task t+1 exits
+
+                        var currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(currentDate/1000)];
+                        var currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+
+                        if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(currentDate/1000)] === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) { //Task t == task t+1
+
+                            if (currentTaskPriority === priority) { // Task t priority = add task priority
+                                if (auxDate.getHours() >= 16) {
+                                    auxDate.setHours(auxDate.getHours() + 24)
+                                    auxDate.setHours(9);
+                                } else if(auxDate.getHours() < 9) {
+                                    auxDate.setHours(9);
+                                } else {
+                                    auxDate.setHours(auxDate.getHours() + 1);
+                                }
+                                var outOfRange = false;
+
+                                while (outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                        outOfRange = true;
+                                    } else {
+                                        if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                            if (auxDate.getHours() >= 16) {
+                                                auxDate.setHours(auxDate.getHours() + 24)
+                                                auxDate.setHours(9);
+                                            } else if(auxDate.getHours() < 9) {
+                                                auxDate.setHours(9);
+                                            } else {
+                                                auxDate.setHours(auxDate.getHours() + 1);
+                                            }
+                                        } else {
+                                            currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                            currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                            if (currentTaskPriority !== priority) {
+
+                                                outOfRange = true;
+                                            }
+
+                                        }
+                                    }
+                                }
+
+                                addNewTaskByMovingOther(auxDate, task);
+                            } else if(currentTaskPriority < priority) { // Task t priority < add task priority
+                                if (auxDate.getHours() >= 16) {
+                                    auxDate.setHours(auxDate.getHours() + 24)
+                                    auxDate.setHours(9);
+                                } else if(auxDate.getHours() < 9) {
+                                    auxDate.setHours(9);
+                                } else {
+                                    auxDate.setHours(auxDate.getHours() + 1);
+                                }
+                                var outOfRange = false;
+
+                                while (outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                        outOfRange = true;
+                                    } else {
+                                        if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                            if (auxDate.getHours() >= 16) {
+                                                auxDate.setHours(auxDate.getHours() + 24)
+                                                auxDate.setHours(9);
+                                            } else if(auxDate.getHours() < 9) {
+                                                auxDate.setHours(9);
+                                            } else {
+                                                auxDate.setHours(auxDate.getHours() + 1);
+                                            }
+                                        } else {
+                                            currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                            currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                            if (currentTaskPriority > priority) {
+
+                                                outOfRange = true;
+                                            }
+
+                                        }
+                                    }
+                                }
+                                addNewTaskByMovingOther(auxDate, task);
+                            } else {
+                                addNewTaskByMovingOther(auxDate, task);
+                            }
+                        } else if(currentTaskPriority < priority) { // Task t priority < add task priority
+                            if (auxDate.getHours() >= 16) {
+                                auxDate.setHours(auxDate.getHours() + 24)
+                                auxDate.setHours(9);
+                            } else if(auxDate.getHours() < 9) {
+                                auxDate.setHours(9);
+                            } else {
+                                auxDate.setHours(auxDate.getHours() + 1);
+                            }
+                            var outOfRange = false;
+
+                            while (outOfRange) {
+                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                    outOfRange = true;
+                                } else {
+                                    if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                        if (auxDate.getHours() >= 16) {
+                                            auxDate.setHours(auxDate.getHours() + 24)
+                                            auxDate.setHours(9);
+                                        } else if(auxDate.getHours() < 9) {
+                                            auxDate.setHours(9);
+                                        } else {
+                                            auxDate.setHours(auxDate.getHours() + 1);
+                                        }
+                                    } else {
+                                        currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                        currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                        if (currentTaskPriority > priority) {
+
+                                            outOfRange = true;
+                                        }
+                                    }
+                                }
+                            }
+                            addNewTaskByMovingOther(auxDate, task);
+                        }
+                        else {
+                            addNewTaskByMovingOther(auxDate, task);
+                        }
+                    } else {
+                        addNewTaskByMovingOther(auxDate, task);
+                    }
+                } else {
+                    // auxDate = currentDate;auxDate.setHours(auxDate.getHours() >= 16 ? 24 - auxDate.getHours() + 9 : auxDate.getHours() + 1);
+                    // addNewTaskByMovingOther(auxDate, task);
+                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] != null) { //Task t+1 exits
+
+                        var currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)];
+                        var currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+
+                        if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) { //Task t == task t+1
+
+                            if (currentTaskPriority === priority) { // Task t priority = add task priority
+                                if (auxDate.getHours() >= 16) {
+                                    auxDate.setHours(auxDate.getHours() + 24)
+                                    auxDate.setHours(9);
+                                } else if(auxDate.getHours() < 9) {
+                                    auxDate.setHours(9);
+                                } else {
+                                    auxDate.setHours(auxDate.getHours() + 1);
+                                }
+                                var outOfRange = false;
+
+                                while (outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                        outOfRange = true;
+                                    } else {
+                                        if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                            if (auxDate.getHours() >= 16) {
+                                                auxDate.setHours(auxDate.getHours() + 24)
+                                                auxDate.setHours(9);
+                                            } else if(auxDate.getHours() < 9) {
+                                                auxDate.setHours(9);
+                                            } else {
+                                                auxDate.setHours(auxDate.getHours() + 1);
+                                            }
+                                        } else {
+                                            currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                            currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                            if (currentTaskPriority !== priority) {
+
+                                                outOfRange = true;
+                                            }
+
+                                        }
+                                    }
+                                }
+
+                                addNewTaskByMovingOther(auxDate, task);
+                            } else if(currentTaskPriority < priority) { // Task t priority < add task priority
+                                if (auxDate.getHours() >= 16) {
+                                    auxDate.setHours(auxDate.getHours() + 24)
+                                    auxDate.setHours(9);
+                                } else if(auxDate.getHours() < 9) {
+                                    auxDate.setHours(9);
+                                } else {
+                                    auxDate.setHours(auxDate.getHours() + 1);
+                                }
+                                var outOfRange = false;
+
+                                while (outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                        outOfRange = true;
+                                    } else {
+                                        if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                            if (auxDate.getHours() >= 16) {
+                                                auxDate.setHours(auxDate.getHours() + 24)
+                                                auxDate.setHours(9);
+                                            } else if(auxDate.getHours() < 9) {
+                                                auxDate.setHours(9);
+                                            } else {
+                                                auxDate.setHours(auxDate.getHours() + 1);
+                                            }
+                                        } else {
+                                            currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                            currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                            if (currentTaskPriority > priority) {
+
+                                                outOfRange = true;
+                                            }
+
+                                        }
+                                    }
+                                }
+                                addNewTaskByMovingOther(auxDate, task);
+                            } else {
+                                addNewTaskByMovingOther(auxDate, task);
+                            }
+                        } else if(currentTaskPriority < priority) { // Task t priority < add task priority
+                            if (auxDate.getHours() >= 16) {
+                                auxDate.setHours(auxDate.getHours() + 24)
+                                auxDate.setHours(9);
+                            } else if(auxDate.getHours() < 9) {
+                                auxDate.setHours(9);
+                            } else {
+                                auxDate.setHours(auxDate.getHours() + 1);
+                            }
+                            var outOfRange = false;
+
+                            while (outOfRange) {
+                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                    outOfRange = true;
+                                } else {
+                                    if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                        if (auxDate.getHours() >= 16) {
+                                            auxDate.setHours(auxDate.getHours() + 24)
+                                            auxDate.setHours(9);
+                                        } else if(auxDate.getHours() < 9) {
+                                            auxDate.setHours(9);
+                                        } else {
+                                            auxDate.setHours(auxDate.getHours() + 1);
+                                        }
+                                    } else {
+                                        currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                        currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                        if (currentTaskPriority > priority) {
+
+                                            outOfRange = true;
+                                        }
+                                    }
+                                }
+                            }
+                            addNewTaskByMovingOther(auxDate, task);
+                        }
+                        else {
+                            addNewTaskByMovingOther(auxDate, task);
+                        }
+                    } else {
+                        addNewTaskByMovingOther(auxDate, task);
+                    }
+                }
+
+            }
+            else {
+                if (auxDate.getHours() >= 16) {
+                    auxDate.setHours(auxDate.getHours() + 24)
+                    auxDate.setHours(9);
+                } else if(auxDate.getHours() < 9) {
+                    auxDate.setHours(9);
+                } else {
+                    auxDate.setHours(auxDate.getHours() + 1);
+                }
+                addNewTaskByMovingOther(auxDate, task);
+            }
+            // currentDate.setHours(auxDate.getHours() >= 15 ? 24 - auxDate.getHours() + 9 : auxDate.getHours() + 1)
+            // currentDate.setSeconds(0)
+            // var slotFound = false;
+            // while (!slotFound) {
+            //
+            // }
+
+            found = true
+        }
+    });
+
+
+    // console.log(assign_user)
+    // firebase.database().ref().child("tasks/details").push().set(task);
+
 
 };
+var currentDate = new Date();
+console.log(currentDate)
+currentDate.setHours(currentDate.getHours())
+currentDate.setSeconds(0)
+console.log(Math.floor(currentDate/1000))
+function setInputFilter(textbox, inputFilter) {
+    ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+        textbox.addEventListener(event, function() {
+            if (inputFilter(this.value)) {
+                this.oldValue = this.value;
+                this.oldSelectionStart = this.selectionStart;
+                this.oldSelectionEnd = this.selectionEnd;
+            } else if (this.hasOwnProperty("oldValue")) {
+                this.value = this.oldValue;
+                this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+            } else {
+                this.value = "";
+            }
+        });
+    });
+}
+setInputFilter(document.getElementById("hours_necessary"), function(value) {
+    return /^[0-9]/.test(value); // Allow digits and '.' only, using a RegExp
+});
 
-//TODO: class for taks
-//TODO: class for user
+
+
+//TODO: support for multiple skills

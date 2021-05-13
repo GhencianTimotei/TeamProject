@@ -39,6 +39,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: row;
+z-index: -1;
 }
 
 .close-icon
@@ -184,6 +185,9 @@ body {
   <div class="preferences_container">
 <form  action="user_preferences.html" id="register" enctype="multipart/form-data" method="get" onSubmit="return validateRegistration()" >
   <div id="profile-container">
+<div class="popup2" style="position: absolute; left: 320px;">
+        <span class="popuptext" id="avatarpopup" onclick="closepopup(this.id)">text</span>
+	</div>
      <image id="user_img" src="https://github.com/mdo.png" />
 </div>
 <input id="file" type="file" 
@@ -191,22 +195,51 @@ body {
 
     <div class="register_fields_row">
       <div class="register_fields_columns">
-        <input type="text" autocomplete="team" id="team" name="team" placeholder="Team"></input>
+<div class="popup2" style="left: 80px;">
+        <span class="popuptext" id="teampopup" onclick="closepopup(this.id)">text</span>
+	</div>
+        <div class="popup2" style="left: 430px;">
+        <span class="popuptext" id="jobpopup" onclick="closepopup(this.id)">text</span>
+	</div>
+<div class="autocomplete">
+        <input type="text" autocomplete="team" id="team" name="team" placeholder="Team" style="margin-left: 0px;"></input>
+</div>
         <input type="text" id="job_title" name="job_title" placeholder="Job Title"></input>
       </div>
       <div class="register_fields_columns">
+<div class="popup2" style="left: 80px;">
+        <span class="popuptext" id="firstnamepopup" onclick="closepopup(this.id)">text</span>
+	</div>
+        <div class="popup2" style="left: 430px; ">
+        <span class="popuptext" id="lastnamepopup" onclick="closepopup(this.id)">text</span>
+	</div>
         <input type="text" autocomplete="given-name" id="first_name" name="fname" placeholder="First name"></input>
         <input type="text" autocomplete="family-name" id="last_name" name="lname" placeholder="Last name"></input>
       </div>
       <div class="register_fields_columns">
+<div class="popup2" style="left: 80px;">
+        <span class="popuptext" id="emailpopup" onclick="closepopup(this.id)">text</span>
+	</div>
+        <div class="popup2" style="left: 430px; ">
+        <span class="popuptext" id="birthdaypopup" onclick="closepopup(this.id)">text</span>
+	</div>
         <input type="email" autocomplete="email" id="email" name="email" placeholder="Email"></input>
         <input type="text" autocomplete="bday" id="birthday" name="birthday" placeholder="Birthday"></input>
       </div>
       <div class="register_fields_columns">
-        <input type="password" autocomplete="password" id="password" name="password" placeholder="New password"></input>
+<div class="popup2" style="left: 80px; ">
+        <span class="popuptext" id="passwordpopup" onclick="closepopup(this.id)">text</span>
+	</div>
+        <div class="popup2" style="left: 430px ">
+        <span class="popuptext" id="cpasswordpopup" onclick="closepopup(this.id)">text</span>
+	</div>
+        <input type="password" autocomplete="password" id="password" name="password" placeholder="New password" title="at least 8 character, one uppercase and one lowercase letter, one digit and one symbol"></input>
         <input type="password" autocomplete="password" id="cpassword" name="cpassword" placeholder="Confirm new password"></input>
       </div>
       <div class="register_fields_columns apply_manager">
+<div class="popup2" style="left: 450px;">
+        <span class="popuptext" id="codepopup" onclick="closepopup(this.id)">text</span>
+	</div>
           <input type="checkbox" id="checkbox" name="checkbox" style="margin-right: 20px; width: 30px; height: 40px"></input>
           <label id="apply" style="white-space:nowrap;">Apply for manager</label>
         <span style="width:55px;"></span>
@@ -215,11 +248,17 @@ body {
         </div>
       </div>
 </form>
+<div class="popup2" style="right: 80px;">
+        <span class="popuptext" id="skillpopup" onclick="closepopup(this.id)">text</span>
+	</div>
        <div class="register_fields_row choose_skills">
-        <input type="text" autocomplete="off" id="search_skills" name="search_skills" placeholder="Search For Skills"></input>
+<div class="autocomplete">
+        <input style="position: relative; z-index: 1;" type="text" autocomplete="off" id="search_skills" name="search_skills" placeholder="Search For Skills"></input>
+</div>
 <div class="listWrapper">
        <ol id="demo"></ol>
 </div>
+
 
 
 

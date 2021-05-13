@@ -15,8 +15,116 @@
     firebase.analytics();
     firebase.database();	
     firebase.storage();
+var teamnames=[];
+var teamsref = firebase.database().ref('teams');
+teamsref.on('child_added', function(data) {
+  teamnames.push(data.val().name);
+
+
+});
+autocompleteteam(document.getElementById("team"), teamnames);
+function closepopup(popupid) {
+var popup = document.getElementById(popupid);
+  popup.classList.toggle("show");
+}
+function autocompleteteam(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+              b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+      x[i].parentNode.removeChild(x[i]);
+    }
+  }
+}
+/*execute a function when someone clicks in the document:*/
+document.addEventListener("click", function (e) {
+    closeAllLists(e.target);
+});
+}
 var uploaded=0;
-var arrayofskills = ["Javascript","PHP","Python","HTML","CSS","C++"];
+var arrayofskills = ["Javascript","Java","PHP","Python","HTML","CSS","C++"];
 function autocomplete(inp, arr) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
@@ -119,150 +227,222 @@ function validateRegistration(){
   var allgood=1;
   var str = [];
         if(document.forms.register.first_name.value==""){
-	document.getElementById("fnameerror").style.color="red";
-        document.getElementById("fnameerror").innerHTML="First name is required";
+	document.getElementById("first_name").style.borderColor="red";
+        var popup = document.getElementById("firstnamepopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!document.forms.register.first_name.value.match(/^[a-zA-Z-' ]*$/)){
-	document.getElementById("fnameerror").style.color="red";
-    document.getElementById("fnameerror").innerHTML="Only letters allowed";
+	document.getElementById("first_name").style.borderColor="red";
+   var popup = document.getElementById("firstnamepopup");
+popup.innerHTML="Only letters";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
-	document.getElementById("fnameerror").style.color="green";
-    document.getElementById("fnameerror").innerHTML="INPUT IS CORRECT";
+	document.getElementById("first_name").style.borderColor="green";
+    
     }
     if(document.forms.register.last_name.value==""){
-document.getElementById("lnameerror").style.color="red";
-    document.getElementById("lnameerror").innerHTML="Last name is required";
+document.getElementById("last_name").style.borderColor="red";
+    var popup = document.getElementById("lastnamepopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else if(!document.forms.register.last_name.value.match(/^[a-zA-Z-' ]*$/)){
-document.getElementById("lnameerror").style.color="red";
-    document.getElementById("lnameerror").innerHTML="Only letters allowed";
+document.getElementById("last_name").style.borderColor="red";
+  var popup = document.getElementById("lastnamepopup");
+popup.innerHTML="Only letters";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
-document.getElementById("lnameerror").style.color="green";
-    document.getElementById("lnameerror").innerHTML="INPUT IS CORRECT";
+document.getElementById("last_name").style.borderColor="green";
     }
     if(document.forms.register.email.value==""){
-        document.getElementById("emailerror").style.color="red";
-        document.getElementById("emailerror").innerHTML="Email is required";
+        document.getElementById("email").style.borderColor="red";
+        var popup = document.getElementById("emailpopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!document.forms.register.email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/
 )){
-    document.getElementById("emailerror").style.color="red";
-        document.getElementById("emailerror").innerHTML="Invalid email format";
+   document.getElementById("email").style.borderColor="red";
+     var popup = document.getElementById("emailpopup");
+popup.innerHTML="Invalid format";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
 firebase.database().ref().child("users").orderByChild("email").equalTo(document.forms.register.email.value).on("value", function(snapshot) {
 if (snapshot.exists()) {
-     document.getElementById("emailerror").style.color="red";
-        document.getElementById("emailerror").innerHTML="Email is already used";
+    document.getElementById("email").style.borderColor="red";
+      var popup = document.getElementById("emailpopup");
+popup.innerHTML="Email used";
+  popup.classList.toggle("show");
      allgood=0;
 }
 else
 {
-	document.getElementById("emailerror").style.color="green";
-    document.getElementById("emailerror").innerHTML="INPUT IS CORRECT";
+	document.getElementById("email").style.borderColor="green";
 }
 });
 
     }
     if(document.forms.register.job_title.value==""){
-document.getElementById("joberror").style.color="red";
-        document.getElementById("joberror").innerHTML="Job is required";
+
+       document.getElementById("job_title").style.borderColor="red";
+var popup = document.getElementById("jobpopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!document.forms.register.job_title.value.match(/^[a-zA-Z-' ]*$/)){
-document.getElementById("joberror").style.color="red";
-        document.getElementById("joberror").innerHTML="Only letters allowed";
+  document.getElementById("job_title").style.borderColor="red";
+      var popup = document.getElementById("jobpopup");
+  popup.innerHTML="Only letters";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
-document.getElementById("joberror").style.color="green";
- 	document.getElementById("joberror").innerHTML="INPUT IS CORRECT";
+  document.getElementById("job_title").style.borderColor="green";
     }
-    if(document.forms.register.team.value==""){
-document.getElementById("teamerror").style.color="red";
-        document.getElementById("teamerror").innerHTML="Team is required";
-	allgood=0;
-    }
-    else if(!document.forms.register.team.value.match(/^[a-zA-Z-' ]*$/)){
-document.getElementById("teamerror").style.color="red";
-    document.getElementById("teamerror").innerHTML="Only letters allowed";
-    allgood=0;
-    }
-    else
-    {
-document.getElementById("teamerror").innerHTML="INPUT IS CORRECT";
-  document.getElementById("teamerror").style.color="green";
-    }
+   
+    
     if(document.forms.register.birthday.value==""){
-          document.getElementById("birthdayerror").style.color="red";
-        document.getElementById("birthdayerror").innerHTML="Birthday is required";
+           document.getElementById("birthday").style.borderColor="red";
+
+
+     var popup = document.getElementById("birthdaypopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!document.forms.register.birthday.value.match(/^([0-9]{2})\/([0-9]{2})\/([0-9]{4})$/)){
-      document.getElementById("birthdayerror").style.color="red";
-        document.getElementById("birthdayerror").innerHTML="Invalid date format";
+           document.getElementById("birthday").style.borderColor="red";
+       var popup = document.getElementById("birthdaypopup");
+popup.innerHTML="Invalid format";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
-	document.getElementById("birthdayerror").innerHTML="INPUT IS CORRECT";
-  document.getElementById("birthdayerror").style.color="green";
+	      document.getElementById("birthday").style.borderColor="green";
     }
     if(document.forms.register.password.value==""){
-       document.getElementById("passerror").style.color="red";
-        document.getElementById("passerror").innerHTML="Password is required";
+             document.getElementById("password").style.borderColor="red";
+      var popup = document.getElementById("passwordpopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!document.forms.register.password.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/)){
-    document.getElementById("passerror").style.color="red";
-        document.getElementById("passerror").innerHTML="Password is too weak";
+   document.getElementById("password").style.borderColor="red";
+     var popup = document.getElementById("passwordpopup");
+popup.innerHTML="Password is too weak";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
-document.getElementById("passerror").innerHTML="INPUT IS CORRECT";
-  document.getElementById("passerror").style.color="green";
+document.getElementById("password").style.borderColor="green";
     }
     if(document.forms.register.cpassword.value==""){
-         document.getElementById("cpasserror").style.color="red";
-        document.getElementById("cpasserror").innerHTML="Password confirmation is required";
+        document.getElementById("cpassword").style.borderColor="red";
+     var popup = document.getElementById("cpasswordpopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!(document.forms.register.password.value===document.forms.register.cpassword.value)){
-      document.getElementById("cpasserror").style.color="red";
-        document.getElementById("cpasserror").innerHTML="Password confirmation is wrong";
+      document.getElementById("cpassword").style.borderColor="red";
+      var popup = document.getElementById("cpasswordpopup");
+popup.innerHTML="Password do not match";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else
     {
-document.getElementById("cpasserror").innerHTML="INPUT IS CORRECT";
-  document.getElementById("cpasserror").style.color="green";
+document.getElementById("cpassword").style.borderColor="green";
     }
     if(document.getElementById("checkbox").checked) {
      if(document.forms.register.admin_code.value==""){
-        alert("Code is required");
+ document.getElementById("admin_code").style.borderColor="red";
+           var popup = document.getElementById("codepopup");
+popup.innerHTML="Field required";
+  popup.classList.toggle("show");
 	allgood=0;
     }
     else if(!(document.forms.register.admin_code.value==="123")){
-        alert("Code is wrong");
+ document.getElementById("admin_code").style.borderColor="red";
+          var popup = document.getElementById("codepopup");
+popup.innerHTML="Invalid code";
+  popup.classList.toggle("show");
     allgood=0;
     }
     else{
+ document.getElementById("admin_code").style.borderColor="green";
 	manager=true;
+ if(document.forms.register.team.value==""){
+  document.getElementById("team").style.borderColor="red";
+    var popup = document.getElementById("teampopup");
+    popup.innerHTML="Field required";
+  popup.classList.toggle("show");
+	allgood=0;
+    }
+    else
+{
+firebase.database().ref().child("teams").orderByChild("name").equalTo(document.forms.register.team.value).on("value", function(snapshot) {
+if (snapshot.exists()) {
+      document.getElementById("team").style.borderColor="red";
+  var popup = document.getElementById("teampopup");
+  popup.innerHTML="Team already exists";
+  popup.classList.toggle("show");
+    allgood=0;
+}
+else
+{
+	 document.getElementById("team").style.borderColor="green";
+}
+});
+
+}
 	}
     }
+else
+{
+ if(document.forms.register.team.value==""){
+  document.getElementById("team").style.borderColor="red";
+    var popup = document.getElementById("teampopup");
+    popup.innerHTML="Field required";
+  popup.classList.toggle("show");
+	allgood=0;
+    }
+    else
+{
+firebase.database().ref().child("teams").orderByChild("name").equalTo(document.forms.register.team.value).on("value", function(snapshot) {
+if (!snapshot.exists()) {
+      document.getElementById("team").style.borderColor="red";
+  var popup = document.getElementById("teampopup");
+  popup.innerHTML="Invalid team";
+  popup.classList.toggle("show");
+    allgood=0;
+}
+else
+{
+	 document.getElementById("team").style.borderColor="green";
+}
+});
+
+}
+}
 var list = document.getElementById('demo').childNodes;
 var theArray = [];
 for(var i=0;i < list.length; i++) {
@@ -271,9 +451,17 @@ for(var i=0;i < list.length; i++) {
     var result =  arrValue.substring(0, remove_after);
     theArray.push(result);
 }
+if (theArray.length==0)
+{
+allgood=0;
+  var popup = document.getElementById("skillpopup");
+popup.innerHTML="At least one skill is required";
+  popup.classList.toggle("show");
+}
+
+
 if (allgood==1){
 var photo="https://github.com/mdo.png";
-var skills=theArray.toString();
 var fname=document.getElementById("first_name").value;
 var lname=document.getElementById("last_name").value;
 var team=document.getElementById("team").value;
@@ -298,7 +486,7 @@ firebase.auth().createUserWithEmailAndPassword(email, pass)
       email: email,
       birthday: birthday,
       manager: manager,
-      skills: skills,
+      skills: theArray,
       imgURL: photo  
     });
      
@@ -312,11 +500,54 @@ firebase.auth().createUserWithEmailAndPassword(email, pass)
 var name= fname+" "+lname;
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
-  
+  var userid=user.uid;
+
+ if(manager)
+{
+
+var newTeamKey = firebase.database().ref().child('teams').push().key;
+var managers=[];
+managers.push(userid);
+var data={
+name: team,
+manager: managers,
+};
+var updates={};
+updates['/teams/'+newTeamKey]=data;
+firebase.database().ref().update(updates);
+}
+else
+{
+
+ var ref = firebase.database().ref("teams");
+ref.on("child_added", function(snapshot) {
+var team2=snapshot.key;
+
+firebase.database().ref("teams/"+team2).on('value', function(snapshot) {
+if(snapshot.val().name===team)
+{
+var members=snapshot.val().team;
+if(!members.includes(userid))
+{
+members.push(userid);
+snapshot.ref.update({"team": members});
+}
+}
+});
+}); 
+} 
+
 user.updateProfile({
   displayName: name,
   photoURL: photo
 }).then(function() {
+var popup = document.getElementById("emailpopup");
+  popup.classList.toggle("show");
+if (manager)
+{
+var popup=document.getElementById("teampopup");
+popup.classList.toggle("show");
+}
 alert("Registration complete");
 window.location.replace("home_user.html");
 }).catch(function(error) {
@@ -347,7 +578,9 @@ function show(input) {
             input.type = ''
             input.type = 'file'
             $('#user_img').attr('src',"https://github.com/mdo.png");
-            alert("Only these file types are accepted : "+validExtensions.join(', '));
+              var popup = document.getElementById("avatarpopup");
+popup.innerHTML="Invalid format";
+  popup.classList.toggle("show");
 	    uploaded=0;
         }
         else
@@ -355,7 +588,9 @@ function show(input) {
 	var size = input.files[0].size;
 
                 if(size > 500000){
-                    alert("File is too big! Maximum size: 5MB");
+                      var popup = document.getElementById("avatarpopup");
+popup.innerHTML="File is too big";
+  popup.classList.toggle("show");
 		    uploaded=0;
 	}
 	else
@@ -403,7 +638,9 @@ function changeText() {
    }
    else
     {
-      alert("Skill already selected");
+         var popup = document.getElementById("skillpopup");
+popup.innerHTML="Skill already selected";
+  popup.classList.toggle("show");
     }  
 }
 

@@ -22,7 +22,7 @@
     <a class="menu_title">Task dispencer</a>
     <hr>
     <div class="menu_buttons">
-      <div class="button"><a>
+      <div class="button" id="searchBtn"><a>
         <svg class="search_button" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
         viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
         <g>
@@ -47,6 +47,9 @@
       </svg>
       Search
     </a></div>
+      <div class="button hide" id="admin"><a href="tasks_manager.html">
+        Administration
+      </a></div>
   </div>
   <hr>
   <div class="avatar">
@@ -130,9 +133,41 @@
   <div class="calendar_hours_days">
 
   </div>
-  <script src="javascript/sidebars.js"></script>
-  <script src="javascript/home_user.js"></script>
+
+
 </div>
 
+    <div id="search_bar" class="search_bar">
+      <div class="search_bar-container">
+        <span class="close">&times;</span>
+        <div class="myTaskDetails">
+          <span id="taskTitle"></span><br>
+          <span id="taskDescription"></span><br>
+          <span id="responsibleUser"></span><br>
+          <span id="necessarySkills"></span><br>
+          <span id="deadlineDate"></span><br>
+          <span id="startTime"></span><br>
+          <span id="priority"></span><br>
+          <span id="noHoursToWork"></span><br>
+          <span id="progress"></span><br>
+        </div>
+        <div class="search_fields_row choose_skills">
+
+          <div id="listwrapper" style="width: 100%" class="listWrapper">
+            <input type="text" autocomplete="off" id="tasks" name="tasks" placeholder="Search Tasks"></input>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="task_description" class="task_description">
+      <div class="task_description-container">
+        <span class="close">&times;</span>
+        <div class="task_description_fields_row choose_tasks">
+          <p>Task details</p>
+        </div>
+      </div>
+    </div>
+    <script src="javascript/sidebars.js"></script>
+    <script src="javascript/home_user.js"></script>
 </body>
 </html>
