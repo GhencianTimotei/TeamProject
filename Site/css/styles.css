@@ -417,16 +417,7 @@ body {
 .cancel:hover{
   background:rgb(255,50,50);
 }
-ul, li	 {
-  align-items: left;
-  justify-content: center;
-  border-bottom: 1px solid rgba(0, 0, 0, .2);
-  list-style:none;
-  padding:0;
-  margin:0;
-  width: 650px;
-  font-size: 18px;
-}
+
 .listWrapper {
   width: 656px;
   height: 150px;
@@ -872,16 +863,7 @@ hr {
   width: 100%;
 }
 
-.ol, li	 {
-  align-items: left;
-  justify-content: center;
-  border-bottom: 1px solid rgba(0, 0, 0, .2);
-  list-style:none;
-  padding:0;
-  margin:0;
-  width: 650px;
-  font-size: 18px;
-}
+
 
 .listWrapper {
   margin: 0 0 0 0;
