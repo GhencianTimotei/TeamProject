@@ -1,10 +1,14 @@
 var month_abr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+var days_names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 var date = new Date();
 var current_date = new Date();
 var left_button = document.getElementById("left_button");
 var right_button = document.getElementById("right_button");
+var notificationsBtn = document.getElementById("notifications");
 var user_uid;
+var notificationsInitialized = false;
+var userOnPage = true;
 var manager = false;
 
 
@@ -25,13 +29,17 @@ firebase.initializeApp(firebaseConfig);
 firebase.auth().onAuthStateChanged(firebaseUser => {
     if(firebaseUser) {
         setUserName();
+        // firebaseUser.updateProfile({displayName: "Emp", photoURL: "t9remkZwmSZePNqpmK5qYRmjVTf2.jpg"});
         console.log(firebaseUser.uid)
-        user_uid = firebaseUser.uid;firebase.database().ref().child("users/" + user_uid + "/manager").get().then((snapshot) => {
+        user_uid = firebaseUser.uid;
+        start();
+        firebase.database().ref().child("users/" + user_uid).get().then((snapshot) => {
             if (snapshot != null) {
-                manager = snapshot.val();
+                manager = snapshot.val()["manager"];
                 if (manager) {
                     document.getElementById("admin").classList.remove("hide");
                 }
+                notificationBadgeHandler(snapshot.val()["notifications"]);
             } else {
                 manager= false;
             }
@@ -42,12 +50,97 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
     }
 });
 
+function notificationBadgeHandler(not) {
+    firebase.database().ref("users/"+user_uid+"/notifications/").on('value', (snapshot) => {
+        if(snapshot != null) {
+            var label = document.getElementById("notification_label");
+            var count = 0;
+                for (var notification in snapshot.val()) {
+                    if (snapshot.val()[notification]["new"] === true) {
+                        count++;
+                    }
+                }
+
+            if (count !== 0) {
+
+                label.innerHTML += "<span class=\"badge\" id=\"notification_number\">"+count+"</span>";
+            } else {
+                var el = document.getElementById("notification_number");
+                if (el) {
+                    el.remove();
+                }
+            }
+        }
+    });
+
+}
+
+function notifyMe() {
+    if (!("Notification" in window)) {
+        alert("This browser does not support system notifications");
+    }
+    else if (Notification.permission === "granted") {
+        notify();
+    }
+    else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+            if (permission === "granted") {
+                notify();
+            }
+        });
+    }
+
+    function notify() {
+        var notification = new Notification('TITLE OF NOTIFICATION', {
+            icon: 'http://carnes.cc/jsnuggets_avatar.jpg',
+            body: "Hey! You are on notice!",
+        });
+
+        notification.onclick = function () {
+            window.open("http://carnes.cc");
+        };
+        setTimeout(notification.close.bind(notification), 7000);
+    }
+
+}
+notifyMe();
+
+
+function notificationPresenterHandler(val) {
+// if (userOnPage) {
+    displayDate();
+    var body = document.createElement("div");body.classList.add("notification_tag");body.id = "notification_body";body.setAttribute("onClick", "console.log(\"test\");");
+    document.getElementsByTagName("body")[0].appendChild(body);
+    var closeBtn = document.createElement("span");closeBtn.textContent = "x";
+    var taskTitle = document.createElement("p");
+    var taskDescription = document.createElement("p");
+    var details = "<p style=\"cursor:pointer;\" onclick=\"showBoldNotificaiton(\'"+val+"\')\">Click here for more details</p>"
+    body.innerHTML = "<span id=\"notification_close\" onclick=\"this.parentElement.remove();\">x</span>"
+    body.innerHTML += "<h3>You have a new task</h3>";
+    firebase.database().ref("tasks/details/"+val).get().then((snapshot) => {
+       if (snapshot != null) {
+           taskTitle.textContent = snapshot.val()["task_title"];body.appendChild(taskTitle);
+           taskDescription.textContent = snapshot.val()["task_description"];body.appendChild(taskDescription);
+            body.innerHTML += details;
+       }
+    });
+
+// }
+}
+
+function start () {
+    var listener = firebase.database().ref("users/" + user_uid + "/notifications");
+    const startKey = listener.push().key;
+    listener.orderByKey().startAt(startKey).on('child_added', (snapshot) => {
+        notificationPresenterHandler(snapshot.val()["ticketID"]);
+    });
+}
 
 function setUserName() {
-
     const authRef = firebase.auth().currentUser;
+    // console.log(authRef.photoURL)
     firebase.storage().ref().child("users_avatar").child(authRef.photoURL).getDownloadURL().then((url) => {
-        document.getElementById("avatar_img").src = url;
+        document.getElementById("avatar_img").src = url != null ? url : "";
     });
     document.getElementById("avatar_name").innerText = authRef.displayName;
 }
@@ -64,6 +157,113 @@ document.getElementById("signOut_button").addEventListener('click', e => {
 //         photoURL: "yajBqtvRL0Vba1rWuQjE6qUoiiF3.jpeg"
 //     })
 // }
+
+function showBoldNotificaiton(idTask) {
+    document.getElementById("notification_popup").style.display = "block";
+    var box = document.getElementsByClassName("notifications_box")[0];
+    var txt = document.createTextNode("You don't have any notifications.");
+    firebase.database().ref().get().then((snapshot) => {
+        let not = snapshot.child("users/"+user_uid+"/notifications").val();
+        let tickets = snapshot.child("tasks/details").val();
+
+        if (not == null) {
+            box.appendChild(txt);
+        } else {
+            box.innerHTML = "<table id=\"notifications_table\">\n" +
+                "          <tr>\n" +
+                "            <th>Date of Creation</th>\n" +
+                "            <th>Ticket</th>\n" +
+                "            <th>Details</th>\n" +
+                "          </tr>\n" +
+                "        </table>";
+            var table = document.getElementById("notifications_table");
+            for (i in not) {
+                var date = new Date(not[i]["date_of_creation"] * 1000);
+                var row = document.createElement("tr"); row.id = i;
+                var col_t = document.createElement("td");
+                var col_d = document.createElement("td");
+                var details = document.createElement("td");
+                // var deleteBtn = document.createElement("a");deleteBtn.href = "#";deleteBtn.classList.add("material-icons"); deleteBtn.setAttribute("style", "margin-right: 1rem; font-size: 20px;");deleteBtn.innerText = "delete";
+                // deleteBtn.onclick = test();
+                // details.appendChild(deleteBtn);
+                var checkBtn = document.createElement("a");
+                details.innerHTML = "<a onClick=\"removeNotification(\'"+i+"\')\" href=\"#\" class=\"material-icons\" style=\"margin-right: 1rem; font-size: 20px;\">delete</a>";
+                details.innerHTML += "<a onClick=\"markReadNotification(\'"+i+"\')\" href=\"#\" class=\"material-icons\" style=\"font-size: 20px;\">check_circle</a>";
+                col_t.appendChild(document.createTextNode(tickets[not[i]["ticketID"]]["task_title"]))
+                col_d.appendChild(document.createTextNode(date.getDate() + " " + month_abr[date.getMonth()] + " " + date.getFullYear()));
+                row.appendChild(col_d);
+                row.appendChild(col_t);
+                row.appendChild(details);
+                if (not[i]["new"]) {
+                    row.classList.add("notifications_box_unread");
+                }
+                table.appendChild(row);
+
+            }
+        }
+    });
+}
+
+notificationsBtn.onclick = function () {
+    document.getElementById("notification_popup").style.display = "block";
+    var box = document.getElementsByClassName("notifications_box")[0];
+    var txt = document.createTextNode("You don't have any notifications.");
+    firebase.database().ref().get().then((snapshot) => {
+        let not = snapshot.child("users/"+user_uid+"/notifications").val();
+        let tickets = snapshot.child("tasks/details").val();
+
+        if (not == null) {
+            box.appendChild(txt);
+        } else {
+            box.innerHTML = "<table id=\"notifications_table\">\n" +
+                "          <tr>\n" +
+                "            <th>Date of Creation</th>\n" +
+                "            <th>Ticket</th>\n" +
+                "            <th>Details</th>\n" +
+                "          </tr>\n" +
+                "        </table>";
+            var table = document.getElementById("notifications_table");
+            for (i in not) {
+                var date = new Date(not[i]["date_of_creation"] * 1000);
+                var row = document.createElement("tr"); row.id = i;
+                var col_t = document.createElement("td");
+                var col_d = document.createElement("td");
+                var details = document.createElement("td");
+                // var deleteBtn = document.createElement("a");deleteBtn.href = "#";deleteBtn.classList.add("material-icons"); deleteBtn.setAttribute("style", "margin-right: 1rem; font-size: 20px;");deleteBtn.innerText = "delete";
+                // deleteBtn.onclick = test();
+                // details.appendChild(deleteBtn);
+                var checkBtn = document.createElement("a");
+                details.innerHTML = "<a onClick=\"removeNotification(\'"+i+"\')\" href=\"#\" class=\"material-icons\" style=\"margin-right: 1rem; font-size: 20px;\">delete</a>";
+                details.innerHTML += "<a onClick=\"markReadNotification(\'"+i+"\')\" href=\"#\" class=\"material-icons\" style=\"font-size: 20px;\">check_circle</a>";
+                col_t.appendChild(document.createTextNode(tickets[not[i]["ticketID"]]["task_title"]))
+                col_d.appendChild(document.createTextNode(date.getDate() + " " + month_abr[date.getMonth()] + " " + date.getFullYear()));
+                row.appendChild(col_d);
+                row.appendChild(col_t);
+                row.appendChild(details);
+                if (not[i]["new"]) {
+                    row.classList.add("notifications_box_unread");
+                }
+                table.appendChild(row);
+
+            }
+        }
+    });
+}
+document.getElementById("close_notifications").onclick = function () {
+    document.getElementById("notification_popup").style.display = "none";
+}
+function removeNotification(id) {
+    var ref = firebase.database().ref().child("users/"+user_uid+"/notifications/"+id);
+    ref.remove()
+    document.getElementById(id).remove();
+};
+
+function markReadNotification(id) {
+    var ref = firebase.database().ref().child("users/"+user_uid+"/notifications/"+id+"/new");
+    ref.set(false);
+    document.getElementById(id).classList.remove("notifications_box_unread");
+};
+
 
 Date.prototype.getWeek = function(){
     return [new Date(this.setDate(this.getDate()-this.getDay()))]
@@ -109,8 +309,9 @@ function displayDate() {
     for (var i = 0; i < 7; i++) {
         var span = document.getElementsByClassName("week_day_date")[i];
         var day = date.getWeek()[i];
+        day.setDate(day.getDate() + 1);
         span.innerHTML = (day.getDate()).toString() + " " + month_abr[day.getMonth()];
-        if (day.getDate() === current_date.getDate() && day.getMonth() === current_date.getMonth() && day.getFullYear() === current_date.getFullYear()){
+        if (day.getDate() === current_date.getDate()  && day.getMonth() === current_date.getMonth() && day.getFullYear() === current_date.getFullYear()){
             setDayToCurrent(i);
         } else {
             setDayToOrdinarry(i);
@@ -119,10 +320,19 @@ function displayDate() {
     }
 }
 
+document.addEventListener('visibilitychange', function() {
+    if(document.hidden) {
+        userOnPage = false;
+    }else{
+        userOnPage = true;
+
+    }
+
+});
 
 
 function displayDayHours(day) {
-    console.log(day);
+    // console.log(day);
     var auxDate = day;
     auxDate.setMinutes(0); auxDate.setSeconds(0);auxDate.setHours(0);
     firebase.database().ref().child("tasks").get().then((snapshot) => {
@@ -152,10 +362,11 @@ function displayDayHours(day) {
                     container.classList.remove("calendar_hours_ordinarry");
                 }
                 if (i > 0) {
-                    document.getElementsByClassName("calendar_hours_days")[day.getDay()].appendChild(container);
+                    console.log(day.get )
+                    document.getElementsByClassName("calendar_hours_days")[day.getDay() == 0 ? 6 : day.getDay() - 1].appendChild(container);
                 } else {
-                    document.getElementsByClassName("calendar_hours_days")[day.getDay()].innerText = "";
-                    document.getElementsByClassName("calendar_hours_days")[day.getDay()].appendChild(container);
+                    document.getElementsByClassName("calendar_hours_days")[day.getDay() == 0 ? 6 : day.getDay() - 1].innerText = "";
+                    document.getElementsByClassName("calendar_hours_days")[day.getDay() == 0 ? 6 : day.getDay() - 1].appendChild(container);
                 }
             }
         } else {
@@ -214,7 +425,6 @@ tasksref.once('value').then(function(data) {
     data.forEach(function (test) {
         tasks.push(test.val());
     })
-    console.log(tasks)
     autocomplete_tasks(document.getElementById("tasks"), tasks);
 });
 

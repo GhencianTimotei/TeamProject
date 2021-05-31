@@ -19,7 +19,7 @@
 
 <body>
   <div class="menu">
-    <a class="menu_title">Task dispencer</a>
+    <a class="menu_title">Task dispecer</a>
     <hr>
     <div class="menu_buttons">
       <div class="button" id="searchBtn"><a>
@@ -54,11 +54,16 @@
   <hr>
   <div class="avatar">
     <a href = "#" class="dropdown-toggle" id="dropdownUser1">
-      <img id="avatar_img" src="assets/generic-user.png">
+      <div style="margin-right:1rem;" id="notification_label">
+        <img id="avatar_img" src="assets/generic-user.png">
+
+      </div>
       <p id="avatar_name"></p>
     </a>
     <ul class="dropdown-menu" id="dropdown-menu">
       <li><a class="dropdown-item" href="user_preferences.html">Profile</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" id="notifications" href="#">Notifications</a></li>
       <li><hr class="dropdown-divider"></li>
       <li><a class="dropdown-item" id="signOut_button" href="#">Sign out</a></li>
     </ul>
@@ -102,18 +107,6 @@
 </div>
 <div class="calendar_hours_container">
   <div class="calendar_hours_days">
-    <div class="calendar_hours">
-      <p>00:00</p>
-      <p class="task_label">Task 1</p>
-    </div>
-    <div class="calendar_hours">
-      <p>01:00</p>
-      <p class="task_label">Task 1</p>
-    </div>
-    <div class="calendar_hours">
-      <p>02:00</p>
-      <p class="task_label">Task 1</p>
-    </div>
   </div>
   <div class="calendar_hours_days">
 
@@ -159,6 +152,14 @@
         </div>
       </div>
     </div>
+  <div id="notification_popup" class="search_bar">
+    <div class="search_bar-container">
+      <span class="close" id="close_notifications">&times;</span>
+      <div class="notifications_box">
+
+      </div>
+    </div>
+  </div>
     <div id="task_description" class="task_description">
       <div class="task_description-container">
         <span class="close">&times;</span>
@@ -169,5 +170,11 @@
     </div>
     <script src="javascript/sidebars.js"></script>
     <script src="javascript/home_user.js"></script>
+<!--<div class="notification_tag" id="notification body">-->
+<!--  <span id="notification_close">x</span>-->
+<!--  <h3>You have a new task</h3>-->
+<!--  <p>The best task ever is waiting you to create new things.</p>-->
+  <p onclick="showBoldNotificaiton(val)">Click here for more details</p>
+<!--</div>-->
 </body>
 </html>

@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Title</title>
+
+</head>
+<body>
+<input id="input"></input>
+<button id="button">submit</button>
+<div id="result"></div>
+</body>
+<script>
+    var input = document.getElementById("input");
+    document.getElementById("button").onclick = function t(){
+        if (input !== null) {
+            console.log(input.value)
+            var timer = new Date(parseInt(input.value) * 1000);
+            console.log(timer)
+            // var txt = document.createTextNode(timer.toDateString());
+            document.getElementById("result").innerHTML = timer;
+        }
+    };
+
+</script>
+</html>

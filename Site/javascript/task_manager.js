@@ -180,20 +180,58 @@ window.onclick = function(e) {
     }
 };
 
+function incrementTimeByOneHourIfPossibe(date) {
+    if (date.getDay() === 0 || date.getDay() > 5) {
+        while (date.getDay() === 0 || date.getDay() > 5) {
+            date.setDate(date.getDate() + 1);
+        }
+        date.setHours(9);
+    } else if (date.getHours() >= 16) {
+        date.setHours(date.getHours() + 24)
+        console.log(date.getDay())
+        date.setHours(9);
+    } else if(date.getHours() < 9) {
+        date.setHours(9);
+    } else {
+        date.setHours(date.getHours() + 1);
+    }
+    if (date.getDay() === 0 || date.getDay() > 5) {
+        while (date.getDay() === 0 || date.getDay() > 5) {
+            date.setDate(date.getDate() + 1);
+        }
+        date.setHours(9);
+    }
+    return date
+}
 
 function addNewTaskByMovingOther(date, task) { /////////////////////////////////////////////////////////////////////////////////////// continue implementation for saving task
-    console.log(date)
+    var d = new Date(date)
+    console.log(d)
     let selected_user = task["responsible_user"];
-    var auxDate = date;
+    var auxDate = new Date(date);
     firebase.database().ref().child("tasks").get().then((snapshot) => {
         if(snapshot.val()["progress"][selected_user] != null) {
             if (snapshot.val()["progress"][selected_user][Math.floor(date/1000)]) {
                 var task_details = {};
                 while(snapshot.val()["progress"][selected_user][Math.floor(auxDate/1000)] != null) {
-                    task_details[Math.floor(auxDate/1000)] = snapshot.val()["progress"][selected_user][Math.floor(auxDate/1000)];
-                    auxDate.setHours(auxDate.getHours() >= 16 ? 9 : auxDate.getHours() < 9 ? 9 : auxDate.getHours() + 1);
+                    var setDate = new Date(auxDate);
+                    for (var i = 0; i < parseInt(task["no_hours_to_work"]); i++) {
+                        setDate = incrementTimeByOneHourIfPossibe(setDate);
+                    }
+                    console.log(snapshot.val()["progress"][selected_user][Math.floor(auxDate/1000)])
+                    task_details[Math.floor(setDate/1000)] = snapshot.val()["progress"][selected_user][Math.floor(auxDate/1000)];
+                    auxDate = incrementTimeByOneHourIfPossibe(auxDate)
                 }
-                console.log(task_details)
+                var key = firebase.database().ref().child("tasks/details").push().key;
+                firebase.database().ref().child("tasks/details/" + key).set(task);
+                for (var i = 0; i < parseInt(task["no_hours_to_work"]); i++) {
+                    task_details[Math.floor(date/1000)] = key
+                    date = incrementTimeByOneHourIfPossibe(date);
+                }
+                for(i in task_details) {
+                    firebase.database().ref().child("tasks/progress/"+selected_user+"/"+i).set(task_details[i]);
+                }
+                setNotification(key, task["responsible_user"]);
 
             } else {
                 task["start_time"] =  Math.floor(date/1000);
@@ -203,18 +241,12 @@ function addNewTaskByMovingOther(date, task) { /////////////////////////////////
                 console.log(task["no_hours_to_work"])
                 for (var i = 0; i < parseInt(task["no_hours_to_work"]); i++) {
                     taskSchedule[Math.floor(date/1000)] = key;
-                    if (auxDate.getHours() >= 16) {
-                        auxDate.setHours(auxDate.getHours() + 24)
-                        auxDate.setHours(9);
-                    } else if(auxDate.getHours() < 9) {
-                        auxDate.setHours(9);
-                    } else {
-                        auxDate.setHours(auxDate.getHours() + 1);
-                    }
+                    date = incrementTimeByOneHourIfPossibe(date);
                 }
                 for(i in taskSchedule) {
                     firebase.database().ref().child("tasks/progress/"+selected_user+"/"+i).set(taskSchedule[i]);
                 }
+                setNotification(key, task["responsible_user"]);
             }
         } else {
             task["start_time"] =  Math.floor(date/1000);
@@ -224,23 +256,38 @@ function addNewTaskByMovingOther(date, task) { /////////////////////////////////
             console.log(task["no_hours_to_work"])
             for (var i = 0; i < parseInt(task["no_hours_to_work"]); i++) {
                 taskSchedule[Math.floor(date/1000)] = key;
-                if (auxDate.getHours() >= 16) {
-                    auxDate.setHours(auxDate.getHours() + 24)
-                    auxDate.setHours(9);
-                } else if(auxDate.getHours() < 9) {
-                    auxDate.setHours(9);
-                } else {
-                    auxDate.setHours(auxDate.getHours() + 1);
-                }
+                date = incrementTimeByOneHourIfPossibe(date);
             }
 
             firebase.database().ref().child("tasks/progress/"+selected_user).set(taskSchedule);
+            setNotification(key, task["responsible_user"]);
 
         }
     });
 }
 
+function setNotification(id, userID) {
+    var date = new Date();date.setSeconds(0, 0);
+    // let key = firebase.database().ref().child("users/"+userID+"/notifications").push().key;
+    var notification = {
+        new: true,
+        date_of_creation: Math.floor(date/1000),
+        ticketID: id
+    }
+    firebase.database().ref().child("users/"+userID+"/notifications/").push(notification);
+}
+function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}
 submit_button.onclick = function () {
+    // dropDown.value = "Priority 2";
+    // skills_necessary.value = "CSS";
+    // task_title.value = "test title2";
+    // task_description.value = "Test description";
+    // responsible_user.value = "Emp Emp";
+    // hours_necessary.value = "2";
+    // deadline_date = {day: 2, month: 2, year: 2022};
+
     var priority = 0;
     let necessary_skills = [skills_necessary.value]
     switch (dropDown.value) {
@@ -268,6 +315,7 @@ submit_button.onclick = function () {
         no_hours_to_work: hours_necessary.value,
         priority: priority};
 
+    // var best_user = {};
     var best_user = employees;
 
     //remove users without necessary skills
@@ -286,19 +334,19 @@ submit_button.onclick = function () {
     var found = false;
     var selected_user = "";
 
+
+
     firebase.database().ref().child("tasks").get().then((snapshot) => {
         while(!found) {
+            if (isEmpty(best_user))
+                break;
+
+
             selected_user = best_user[randomIntFromInterval(best_user.length)]
-            var currentDate = new Date();currentDate.setSeconds(0);currentDate.setMinutes(0);
-            var auxDate = new Date();auxDate.setSeconds(0);auxDate.setMinutes(0);
-            if (auxDate.getHours() >= 16) {
-                auxDate.setHours(auxDate.getHours() + 24)
-                auxDate.setHours(9);
-            } else if(auxDate.getHours() < 9) {
-                auxDate.setHours(9);
-            } else {
-                auxDate.setHours(auxDate.getHours() + 1);
-            }
+            // selected_user = best_user[1];
+            var currentDate = new Date();currentDate.setMinutes(0, 0, 0);
+            var auxDate = new Date(currentDate);
+            auxDate = incrementTimeByOneHourIfPossibe(auxDate);
             console.log(best_user)
             console.log(selected_user)
             task["responsible_user"] = selected_user["uid"];
@@ -312,29 +360,15 @@ submit_button.onclick = function () {
                         if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(currentDate/1000)] === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) { //Task t == task t+1
 
                             if (currentTaskPriority === priority) { // Task t priority = add task priority
-                                if (auxDate.getHours() >= 16) {
-                                    auxDate.setHours(auxDate.getHours() + 24)
-                                    auxDate.setHours(9);
-                                } else if(auxDate.getHours() < 9) {
-                                    auxDate.setHours(9);
-                                } else {
-                                    auxDate.setHours(auxDate.getHours() + 1);
-                                }
+                                auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                 var outOfRange = false;
 
-                                while (outOfRange) {
-                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                while (!outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
                                         outOfRange = true;
                                     } else {
                                         if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
-                                            if (auxDate.getHours() >= 16) {
-                                                auxDate.setHours(auxDate.getHours() + 24)
-                                                auxDate.setHours(9);
-                                            } else if(auxDate.getHours() < 9) {
-                                                auxDate.setHours(9);
-                                            } else {
-                                                auxDate.setHours(auxDate.getHours() + 1);
-                                            }
+                                            auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                         } else {
                                             currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
                                             currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
@@ -349,29 +383,15 @@ submit_button.onclick = function () {
 
                                 addNewTaskByMovingOther(auxDate, task);
                             } else if(currentTaskPriority < priority) { // Task t priority < add task priority
-                                if (auxDate.getHours() >= 16) {
-                                    auxDate.setHours(auxDate.getHours() + 24)
-                                    auxDate.setHours(9);
-                                } else if(auxDate.getHours() < 9) {
-                                    auxDate.setHours(9);
-                                } else {
-                                    auxDate.setHours(auxDate.getHours() + 1);
-                                }
+                                auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                 var outOfRange = false;
 
-                                while (outOfRange) {
-                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                while (!outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
                                         outOfRange = true;
                                     } else {
                                         if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
-                                            if (auxDate.getHours() >= 16) {
-                                                auxDate.setHours(auxDate.getHours() + 24)
-                                                auxDate.setHours(9);
-                                            } else if(auxDate.getHours() < 9) {
-                                                auxDate.setHours(9);
-                                            } else {
-                                                auxDate.setHours(auxDate.getHours() + 1);
-                                            }
+                                            auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                         } else {
                                             currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
                                             currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
@@ -387,30 +407,16 @@ submit_button.onclick = function () {
                             } else {
                                 addNewTaskByMovingOther(auxDate, task);
                             }
-                        } else if(currentTaskPriority < priority) { // Task t priority < add task priority
-                            if (auxDate.getHours() >= 16) {
-                                auxDate.setHours(auxDate.getHours() + 24)
-                                auxDate.setHours(9);
-                            } else if(auxDate.getHours() < 9) {
-                                auxDate.setHours(9);
-                            } else {
-                                auxDate.setHours(auxDate.getHours() + 1);
-                            }
+                        } else if(currentTaskPriority > priority) { // Task t priority < add task priority
+                            // auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                             var outOfRange = false;
 
-                            while (outOfRange) {
-                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                            while (!outOfRange) {
+                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
                                     outOfRange = true;
                                 } else {
                                     if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
-                                        if (auxDate.getHours() >= 16) {
-                                            auxDate.setHours(auxDate.getHours() + 24)
-                                            auxDate.setHours(9);
-                                        } else if(auxDate.getHours() < 9) {
-                                            auxDate.setHours(9);
-                                        } else {
-                                            auxDate.setHours(auxDate.getHours() + 1);
-                                        }
+                                        auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                     } else {
                                         currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
                                         currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
@@ -424,6 +430,25 @@ submit_button.onclick = function () {
                             addNewTaskByMovingOther(auxDate, task);
                         }
                         else {
+
+                            var outOfRange = false;
+
+                            while (!outOfRange) {
+                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
+                                    outOfRange = true;
+                                } else {
+                                    if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
+                                        auxDate = incrementTimeByOneHourIfPossibe(auxDate);
+                                    } else {
+                                        currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
+                                        currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
+                                        if (currentTaskPriority > priority) {
+
+                                            outOfRange = true;
+                                        }
+                                    }
+                                }
+                            }
                             addNewTaskByMovingOther(auxDate, task);
                         }
                     } else {
@@ -439,30 +464,16 @@ submit_button.onclick = function () {
 
                         if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) { //Task t == task t+1
 
-                            if (currentTaskPriority === priority) { // Task t priority = add task priority
-                                if (auxDate.getHours() >= 16) {
-                                    auxDate.setHours(auxDate.getHours() + 24)
-                                    auxDate.setHours(9);
-                                } else if(auxDate.getHours() < 9) {
-                                    auxDate.setHours(9);
-                                } else {
-                                    auxDate.setHours(auxDate.getHours() + 1);
-                                }
+                            if (currentTaskPriority === priority) { // Task already in database priority = add task priority
+                                auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                 var outOfRange = false;
 
-                                while (outOfRange) {
-                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                while (!outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
                                         outOfRange = true;
                                     } else {
                                         if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
-                                            if (auxDate.getHours() >= 16) {
-                                                auxDate.setHours(auxDate.getHours() + 24)
-                                                auxDate.setHours(9);
-                                            } else if(auxDate.getHours() < 9) {
-                                                auxDate.setHours(9);
-                                            } else {
-                                                auxDate.setHours(auxDate.getHours() + 1);
-                                            }
+                                            auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                         } else {
                                             currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
                                             currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
@@ -476,30 +487,16 @@ submit_button.onclick = function () {
                                 }
 
                                 addNewTaskByMovingOther(auxDate, task);
-                            } else if(currentTaskPriority < priority) { // Task t priority < add task priority
-                                if (auxDate.getHours() >= 16) {
-                                    auxDate.setHours(auxDate.getHours() + 24)
-                                    auxDate.setHours(9);
-                                } else if(auxDate.getHours() < 9) {
-                                    auxDate.setHours(9);
-                                } else {
-                                    auxDate.setHours(auxDate.getHours() + 1);
-                                }
+                            } else if(currentTaskPriority < priority) { // Task already in database priority < add task priority (as number, not as actual priority)
+                                auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                 var outOfRange = false;
 
-                                while (outOfRange) {
-                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                                while (!outOfRange) {
+                                    if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
                                         outOfRange = true;
                                     } else {
                                         if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
-                                            if (auxDate.getHours() >= 16) {
-                                                auxDate.setHours(auxDate.getHours() + 24)
-                                                auxDate.setHours(9);
-                                            } else if(auxDate.getHours() < 9) {
-                                                auxDate.setHours(9);
-                                            } else {
-                                                auxDate.setHours(auxDate.getHours() + 1);
-                                            }
+                                            auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                         } else {
                                             currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
                                             currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
@@ -515,30 +512,16 @@ submit_button.onclick = function () {
                             } else {
                                 addNewTaskByMovingOther(auxDate, task);
                             }
-                        } else if(currentTaskPriority < priority) { // Task t priority < add task priority
-                            if (auxDate.getHours() >= 16) {
-                                auxDate.setHours(auxDate.getHours() + 24)
-                                auxDate.setHours(9);
-                            } else if(auxDate.getHours() < 9) {
-                                auxDate.setHours(9);
-                            } else {
-                                auxDate.setHours(auxDate.getHours() + 1);
-                            }
+                        } else if(currentTaskPriority > priority) { // Task already in database priority > add task priority
+                            auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                             var outOfRange = false;
 
-                            while (outOfRange) {
-                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] === null) {
+                            while (!outOfRange) {
+                                if (snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)] == null) {
                                     outOfRange = true;
                                 } else {
                                     if (currentTask === snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]) {
-                                        if (auxDate.getHours() >= 16) {
-                                            auxDate.setHours(auxDate.getHours() + 24)
-                                            auxDate.setHours(9);
-                                        } else if(auxDate.getHours() < 9) {
-                                            auxDate.setHours(9);
-                                        } else {
-                                            auxDate.setHours(auxDate.getHours() + 1);
-                                        }
+                                        auxDate = incrementTimeByOneHourIfPossibe(auxDate);
                                     } else {
                                         currentTask = snapshot.val()["progress"][selected_user["uid"]][Math.floor(auxDate/1000)]
                                         currentTaskPriority = snapshot.val()["details"][currentTask]["priority"];
@@ -561,15 +544,8 @@ submit_button.onclick = function () {
 
             }
             else {
-                if (auxDate.getHours() >= 16) {
-                    auxDate.setHours(auxDate.getHours() + 24)
-                    auxDate.setHours(9);
-                } else if(auxDate.getHours() < 9) {
-                    auxDate.setHours(9);
-                } else {
-                    auxDate.setHours(auxDate.getHours() + 1);
-                }
-                addNewTaskByMovingOther(auxDate, task);
+                auxDate = incrementTimeByOneHourIfPossibe(auxDate);
+                addNewTaskByMovingOther(currentDate, task);
             }
             // currentDate.setHours(auxDate.getHours() >= 15 ? 24 - auxDate.getHours() + 9 : auxDate.getHours() + 1)
             // currentDate.setSeconds(0)
