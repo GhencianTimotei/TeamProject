@@ -211,7 +211,7 @@ for(var k=0;k<arrayofskills.length;k++){
 }
 });
   } else {
-//window.location.href = "login.html";
+window.location.href = "login.html";
   }
 });
 function validateRegistration(){
@@ -914,6 +914,7 @@ function changeText() {
     if(exists==0)
     {
     var entry = document.createElement('li');
+    entry.style.width="610px";
     entry.appendChild(document.createTextNode(firstname));
     entry.setAttribute('id','item'+lastid);
     var removeButton = document.createElement('button');

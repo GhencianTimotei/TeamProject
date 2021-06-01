@@ -657,6 +657,7 @@ function changeText() {
     if(exists==0)
     {
     var entry = document.createElement('li');
+    entry.style.width="595px";
     entry.appendChild(document.createTextNode(firstname));
     entry.setAttribute('id','item'+lastid);
     var removeButton = document.createElement('button');
