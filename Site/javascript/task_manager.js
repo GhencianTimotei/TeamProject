@@ -14,6 +14,7 @@ var hours_necessary = document.getElementById("hours_necessary");
 var task_priority = document.getElementById("browser");
 var dropDown = document.getElementById("browser");
 var user_uid;
+var id;
 var listOfSkills = [];
 var employees = [];
 var employee_name = [];
@@ -115,16 +116,646 @@ function getTeamMembers() {
 // var teams = firebase.database().ref().child("teams")
 // teams.push().set(team1)
 
+function filterUsers()
+{
+var options = document.getElementById('skillsusers').selectedOptions;
+var values = Array.from(options).map(({ value }) => value);
+var usersworklist= document.getElementById("userswork");
+var nodes= usersworklist.childNodes;
+for (var j=0;j<nodes.length;j++)
+{
 
+
+nodes[j].style.display="none";
+}
+
+
+
+var value= document.getElementById("userhours").value;
+var team= document.getElementById("userteams").value;
+if(team!="any")
+{
+
+firebase.database().ref("teams").orderByChild("name").equalTo(team).on("child_added", function(snapshot) {
+
+var members=snapshot.val().team;
+if(members!=null)
+{
+for(var j=0;j<members.length;j++)
+{
+firebase.database().ref("users/"+members[j]).on('value', (snapshot) => { 
+var username= snapshot.val().first_name+" "+snapshot.val().last_name;
+if (value=="any")
+{
+var add=1;
+if(values.length!=0)
+{
+var skills=snapshot.val().skills;
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+add=0;
+}
+}
+}
+for(var i=0;i<nodes.length;i++)
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+if(username==name2)
+{
+
+if(add==1)
+{
+
+document.getElementById(name2).style.display="block";
+}
+
+}
+
+}
+}
+else if (value=="0")
+{
+var add=1;
+if(values.length!=0)
+{
+var skills=snapshot.val().skills;
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+add=0;
+}
+}
+}
+for(var i=0;i<nodes.length;i++)
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+var split2=split[1].split(" ");
+
+if(split2[1]=="0")
+{
+
+if(username==name2)
+{
+if(add==1)
+{
+document.getElementById(name2).style.display="block";
+}
+}
+}
+
+}
+}
+else if(value=="40")
+{
+var add=1;
+if(values.length!=0)
+{
+var skills=snapshot.val().skills;
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+add=0;
+}
+}
+}
+for(var i=0;i<nodes.length;i++)
+{
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+var split2=split[1].split(" ");
+if(split2[1]=="40")
+{
+
+if(username==name2)
+{
+if(add==1)
+{
+document.getElementById(name2).style.display="block";
+}
+}
+}
+
+}
+}
+else {
+var add=1;
+var split=value.split("-");
+var int1=parseInt(split[0],10);
+var int2=parseInt(split[1],10);
+if(values.length!=0)
+{
+var skills=snapshot.val().skills;
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+add=0;
+}
+}
+}
+for(var i=0;i<nodes.length;i++)
+{
+var split2=nodes[i].innerHTML.split("|");
+var split3=split2[1].split(" ");
+var name=split2[0];
+var name2=name.substring(0, name.length -1);
+var value2=parseInt(split3[1],10);
+if(value2>=int1 && value2 <=int2)
+
+{
+if(username==name2)
+{
+if(add==1)
+{
+document.getElementById(name2).style.display="block";
+}
+}
+}
+}
+}
+});
+}
+}
+});
+}
+else if (value=="any")
+{
+
+if(values.length!=0)
+{
+for(var i=0;i<nodes.length;i++)
+{
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+var userid=document.getElementById(name2).name;
+add=1;
+firebase.database().ref("users/"+userid).on('value', (snapshot) => {
+var skills=snapshot.val().skills;
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+add=0;
+}
+}
+if(add==1)
+{
+document.getElementById(name2).style.display="block";
+}
+});
+} 
+}
+else {
+for(var i=0;i<nodes.length;i++)
+{
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+document.getElementById(name2).style.display="block";
+}
+}
+}
+else if (value=="0")
+{
+
+for(var i=0;i<nodes.length;i++)
+{
+var split=nodes[i].innerHTML.split("|");
+
+var split2=split[1].split(" ");
+if(split2[1]=="0")
+{
+
+if(values.length!=0)
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+
+var userid=document.getElementById(name2).name;
+add=1;
+firebase.database().ref("users/"+userid).on('value', (snapshot) => {
+var skills=snapshot.val().skills;
+var username=snapshot.val().first_name+" "+snapshot.val().last_name;
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+
+for (var j=0;j<values.length;j++)
+{
+
+if (!skills.includes(values[j]))
+{
+
+add=0;
+}
+}
+if(add==1)
+{
+if(username==name2)
+{
+document.getElementById(name2).style.display="block";
+}
+}
+
+});
+}
+else
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+document.getElementById(name2).style.display="block";
+}
+}
+
+}
+
+}
+
+
+else if(value=="40")
+{
+for(var i=0;i<nodes.length;i++)
+{
+var split=nodes[i].innerHTML.split("|");
+
+var split2=split[1].split(" ");
+if(split2[1]=="40")
+if(values.length!=0)
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+var userid=document.getElementById(name2).name;
+add=1;
+firebase.database().ref("users/"+userid).on('value', (snapshot) => {
+var skills=snapshot.val().skills;
+var username=snapshot.val().first_name+" "+snapshot.val().last_name;
+
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+add=0;
+}
+}
+if(add==1)
+{
+if(username==name2)
+{
+document.getElementById(name2).style.display="block";
+}
+}
+});
+}
+else {
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+document.getElementById(name2).style.display="block";
+}
+}
+}
+}
+else {
+var split=value.split("-");
+var int1=parseInt(split[0],10);
+var int2=parseInt(split[1],10);
+for(var i=0;i<nodes.length;i++)
+{
+var split2=nodes[i].innerHTML.split("|");
+var split3=split2[1].split(" ");
+var value2=parseInt(split3[1],10);
+if(value2>=int1 && value2 <=int2)
+
+
+{
+if (values.length!=0)
+{
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+var userid=document.getElementById(name2).name;
+add=1;
+firebase.database().ref("users/"+userid).on('value', (snapshot) => {
+var skills=snapshot.val().skills;
+var username=snapshot.val().first_name+" "+snapshot.val().last_name;
+for (var j=0;j<values.length;j++)
+{
+if (!skills.includes(values[j]))
+{
+
+add=0;
+}
+}
+if(add==1)
+{
+if(username==name2)
+{
+document.getElementById(name2).style.display="block";
+}
+}
+});
+}
+else {
+
+var split=nodes[i].innerHTML.split("|");
+var name=split[0];
+var name2=name.substring(0, name.length -1);
+document.getElementById(name2).style.display="block";
+}
+}
+}
+}
+}
+function filterTask()
+{
+var teamopt=document.getElementById("teamtasks").value;
+document.getElementById("tasks").innerHTML="";
+var taskslist= document.getElementById("tasks");
+var options = document.getElementById('skillstask').selectedOptions;
+var values = Array.from(options).map(({ value }) => value);
+
+var ref = firebase.database().ref("teams");
+ref.on("child_added", function(snapshot) {
+var team=snapshot.key;
+
+firebase.database().ref("teams/"+team+"/manager").on("child_added", function(snapshot) {
+if(snapshot.val()==id)
+{
+
+firebase.database().ref("teams/"+team+"/team").on("child_added", function(snapshot) {
+var usid=snapshot.val();
+firebase.database().ref("users/"+usid).on('value', function(snapshot) {
+var userteam=snapshot.val().team;
+firebase.database().ref("tasks/details").orderByChild("responsible_user").equalTo(usid).on("child_added", function(snapshot) {
+var add=1; 
+
+if (snapshot.val().priority!=document.getElementById("taskpriority").value)
+{
+if(document.getElementById("taskpriority").value!="any")
+{
+add=0;
+}
+}
+
+if(values.length!=0)
+{
+var taskskills=snapshot.val().necessary_skills;
+
+for(var j=0;j<values.length;j++)
+{
+if(!taskskills.includes(values[j]))
+{
+add=0;
+}
+}
+}
+if(teamopt!="any")
+{
+if(teamopt!=userteam)
+{
+
+add=0;
+}
+} 
+
+if(add==1)
+{
+
+var li=document.createElement("li");
+//li.style.width="490px";
+li.appendChild(document.createTextNode(snapshot.val().task_title));
+li.setAttribute('onClick','displayTaskDetails("'+snapshot.key+'")');
+taskslist.appendChild(li); 
+}
+});
+
+
+});
+});
+}
+
+});
+
+
+
+});
+}
+function displayMembers(teamid){
+ var popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.id = 'test';
+    var cancel = document.createElement('div');
+    cancel.className = 'cancel';
+    var message=document.createElement('span');
+    message.style.color="white";
+    cancel.onclick = function (e) { popup.parentNode.removeChild(popup) };
+    var userlist=document.createElement('ul');              
+    popup.appendChild(cancel);
+    popup.appendChild(message);
+    popup.appendChild(userlist);
+    userlist.style.width="480px";
+    userlist.style.borderBottomWidth="0px";
+    document.body.appendChild(popup);
+firebase.database().ref("teams/"+teamid).on('value', function(snapshot) {
+var nameofteam=snapshot.val().name;
+message.innerHTML=nameofteam;
+   
+});
+firebase.database().ref("teams/"+teamid+"/team").on("child_added", function(snapshot) {
+var usid=snapshot.val();
+firebase.database().ref("users/"+usid).on('value', function(snapshot) {
+var fname=snapshot.val().first_name;
+var lname=snapshot.val().last_name;
+var name=fname+" "+lname;
+var li=document.createElement("li");
+li.style.width="480px";
+//li.style.color="black";
+//li.style.borderBottom="1px solid black";
+li.appendChild(document.createTextNode(name));
+userlist.appendChild(li);
+});
+});
+}
+
+function displayUserDetails(userid){
+ var popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.id = 'test';
+    popup.style.height="110px";
+    var cancel = document.createElement('div');
+    cancel.className = 'cancel';
+    var message=document.createElement('span');
+    var data=document.createElement("P");
+    cancel.onclick = function (e) { popup.parentNode.removeChild(popup) };
+    popup.appendChild(cancel);
+    popup.appendChild(message);
+    popup.appendChild(data);
+    document.body.appendChild(popup);
+    message.style.color="white";
+    data.style.color="white";
+firebase.database().ref("users/"+userid).on('value', function(snapshot) {
+var nameofuser="Name: "+snapshot.val().first_name+" "+snapshot.val().last_name;
+message.innerHTML=nameofuser;
+var skills=snapshot.val().skills;
+var skillsstring=skills.join();
+var displaydata="birthday: "+snapshot.val().birthday+"<br>"+"email: "+snapshot.val().email+"<br>"+"job: "+snapshot.val().job+"<br>"+"team: "+snapshot.val().team+"<br>"+"skills: "+skillsstring;
+data.innerHTML=displaydata;
+});
+
+}
+
+function displayTaskDetails(taskid){
+ var popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.id = 'test';
+    popup.style.height="110px";
+    var cancel = document.createElement('div');
+    cancel.className = 'cancel';
+    var message=document.createElement('span');
+    var data=document.createElement("P");
+    var name=document.createElement("P");
+    var skills=document.createElement("P");
+    message.style.color="white";
+    data.style.color="white";
+    name.style.color="white";
+    skills.style.color="white";
+    cancel.onclick = function (e) { popup.parentNode.removeChild(popup) };
+    popup.appendChild(cancel);
+    popup.appendChild(message);
+    popup.appendChild(data);
+    popup.appendChild(name);
+    popup.appendChild(skills);
+    document.body.appendChild(popup);
+firebase.database().ref("tasks/details/"+taskid).on('value', function(snapshot) {
+var userid=snapshot.val().responsible_user;
+
+firebase.database().ref("users/"+userid).on('value',function(snapshot)
+{
+
+var nameofuser=snapshot.val().first_name+" "+snapshot.val().last_name;
+var displayname="responsible user: "+nameofuser;
+name.innerHTML=displayname;
+
+});
+var taskskills=snapshot.val().necessary_skills.join();
+var displaytaskskills="Necessary skills: "+taskskills;
+var nameoftask="Title: "+snapshot.val().task_title;
+var displaydata="hours to work: "+snapshot.val().no_hours_to_work+"<br>"+"priority: "+snapshot.val().priority+"<br>"+"description: "+snapshot.val().task_description;
+data.innerHTML=displaydata;
+message.innerHTML=nameoftask;
+skills.innerHTML=displaytaskskills;
+});
+
+}
 
 //Verify user's login status
+
 firebase.auth().onAuthStateChanged(firebaseUser => {
     if(firebaseUser) {
         setUserName();
         getTeamMembers();
-        // window.location.href = "home_user.html";
+        id=firebaseUser.uid;
+firebase.database().ref('users/'+id).on('value', function(snapshot) {
+    
+    var manager= snapshot.val().manager;
+if(manager==true)
+{
+var userswork= document.getElementById("userswork");
+var memberslist= document.getElementById("teams");
+var taskslist= document.getElementById("tasks");
+memberslist.style.visibility="visible";
+var ref = firebase.database().ref("teams");
+ref.on("child_added", function(snapshot) {
+var team=snapshot.key;
+var hours=0;
+
+firebase.database().ref("teams/"+team+"/manager").on("child_added", function(snapshot) {
+if(snapshot.val()==id)
+{
+firebase.database().ref("teams/"+team).on('value', function(snapshot) {
+var teamname=snapshot.val().name;
+var li=document.createElement("li");
+li.setAttribute('id',team);
+li.setAttribute('onClick','displayMembers("'+team+'")');
+li.appendChild(document.createTextNode(teamname));
+memberslist.appendChild(li);
+var opt= document.createElement("option");
+opt.value=teamname;
+opt.innerHTML=teamname;
+document.getElementById("userteams").appendChild(opt);
+var opt2= document.createElement("option");
+opt2.value=teamname;
+opt2.innerHTML=teamname;
+document.getElementById("teamtasks").appendChild(opt2);
+});
+firebase.database().ref("teams/"+team+"/team").on("child_added", function(snapshot) {
+var usid=snapshot.val();
+firebase.database().ref("users/"+usid).on('value', function(snapshot) {
+var fname=snapshot.val().first_name;
+var lname=snapshot.val().last_name;
+var name=fname+" "+lname;
+
+var li=document.createElement("li");
+//li.style.width="490px";
+li.id=name;
+li.setAttribute('onClick','displayUserDetails("'+usid+'")');
+li.name=usid;
+li.appendChild(document.createTextNode(name+" | 0 hours"));
+userswork.appendChild(li);
+
+firebase.database().ref("tasks/details").orderByChild("responsible_user").equalTo(usid).on("child_added", function(snapshot) {
+  hours=hours+parseInt(snapshot.val().no_hours_to_work,10);
+document.getElementById(name).innerHTML=name+" | "+hours.toString()+" hours";
+var li=document.createElement("li");
+//li.style.width="490px";
+var taskid=snapshot.key;
+li.setAttribute('onClick','displayTaskDetails("'+taskid+'")');
+li.appendChild(document.createTextNode(snapshot.val().task_title));
+taskslist.appendChild(li);
+
+});
+
+
+
+});
+});
+}
+
+});
+
+
+
+});
+}
+else
+{
+window.location.href = "home_user.html";
+}
+
+});
+        
     } else {
-        window.location.href = "login.html";
+      window.location.href = "login.html";
     }
 });
 

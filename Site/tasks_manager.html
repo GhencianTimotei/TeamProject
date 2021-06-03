@@ -18,7 +18,29 @@
   <script src="javascript/autocomplete.js"></script>
 
 </head>
+<style>
 
+
+.listWrapper {
+  margin-top: 2%;
+  margin-left: 20%;
+  background-color: #212529;
+}
+ul, li	 {
+
+align-items: left;
+justify-content: center; 
+border-bottom: 1px solid white;
+list-style:none;
+padding:0;
+margin:0;
+width: 650px;
+font-size: 18px;
+color: white;
+}
+
+
+</style>
 <body>
   <div class="menu">
     <a class="menu_title">Task dispecer</a>
@@ -65,6 +87,73 @@
 
 <div class="listWrapper">
        <ol id="teams"></ol>
+</div>
+<div class="filter" style="height: 70px;">
+<p style="color: white; display: inline; font-size: 10px;"> Hours: </p> 
+<select style="fill: #212529;" name="userhours" id="userhours">
+  <option value="any">any</option>
+  <option value="0">0</option>
+  <option value="0-10">0-10</option>
+  <option value="10-20">10-20</option>
+  <option value="20-30">20-30</option>
+  <option value="30-40">30-40</option>
+  <option value="40">40</option>
+</select>
+<p style="color:white; display: inline; font-size: 10px;"> Team: </p>
+<select style="fill: #212529;" name="userteams" id="userteams">
+<option value="any">any</option>
+</select>
+<p style="color: white; display: inline; font-size: 10px;"> Skills: </p>
+<select style="fill: #212529; position: absolute;" id="skillsusers" multiple="multiple">
+    <option value="Javascript">Javascript</option>
+    <option value="Java">Java</option>
+    <option value="PHP">PHP</option>
+    <option value="Python">Python</option>
+    <option value="HTML">HTML</option>
+    <option value="CSS">CSS</option>
+    <option value="C++">C++</option>
+</select>
+
+         <input type="button" style="fill: #212529; margin-left: 1px; display: block; width: 50px;" onclick="filterUsers()" value="Filter" />
+	
+</div>
+<div class="listWrapper">
+
+       <ol id="userswork"></ol>
+</div>
+
+<div class="filter" style="height: 70px;">
+<p style="color: white; display: inline; font-size: 10px;"> Priority: </p>
+<select style="fill: #212529;" name="taskpriority" id="taskpriority">
+  <option value="any">any</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+</select>
+<p style="color:white; display: inline; font-size: 10px;"> Team: </p>
+<select style="fill: #212529;" name="teamtasks" id="teamtasks">
+  <option value="any">any</option>
+</select>
+<p style="color: white; display: inline; font-size: 10px;"> Skills: </p>
+<select style="position: absolute; fill: #212529;" id="skillstask" multiple="multiple">
+    <option value="Javascript">Javascript</option>
+    <option value="Java">Java</option>
+    <option value="PHP">PHP</option>
+    <option value="Python">Python</option>
+    <option value="HTML">HTML</option>
+    <option value="CSS">CSS</option>
+    <option value="C++">C++</option>
+</select>
+
+         <input type="button" style="fill: #212529; margin-left: 1px; display: block; width: 50px; " onclick="filterTask()" value="Filter" />
+
+</div>
+
+<div class="listWrapper">
+
+       <ol id="tasks"></ol>
+</div>
 </div>
 
 </div>

@@ -15,6 +15,21 @@
     firebase.analytics();
     firebase.database();	
     firebase.storage();
+
+ firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+   // document.body.style.filter="blur(3px)";
+  //  document.body.style.display="none";
+ var iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    document.getElementById("loader").style.display="block";
+  
+    setTimeout(function() { window.location.href="home_user.html"; } , 5000);
+  } else {
+    
+  }
+});
+
 var teamnames=[];
 var teamsref = firebase.database().ref('teams');
 teamsref.on('child_added', function(data) {
@@ -469,6 +484,7 @@ var job=document.getElementById("job_title").value;
 var birthday=document.getElementById("birthday").value;
 var email=document.getElementById("email").value;
 var pass=document.getElementById("password").value;
+var photo2;
 
 firebase.auth().createUserWithEmailAndPassword(email, pass)
   .then((userCredential) => {
@@ -477,7 +493,9 @@ firebase.auth().createUserWithEmailAndPassword(email, pass)
    var image=document.getElementById("file").files[0];
    storageRef.put(image);
    photo='users_avatar/'+userCredential.user.uid+'.'+fileNameExt;
+   photo2=userCredential.user.uid+"."+fileNameExt;
    }
+
     firebase.database().ref('users/' + userCredential.user.uid).set({
       first_name: fname,
       last_name: lname,
@@ -489,7 +507,7 @@ firebase.auth().createUserWithEmailAndPassword(email, pass)
       skills: theArray,
       imgURL: photo  
     });
-     
+
   })
   .catch((error) => {
     var errorCode = error.code;
@@ -497,7 +515,7 @@ firebase.auth().createUserWithEmailAndPassword(email, pass)
     // ..
   });
 
-var name= fname+" "+lname;
+ var name= fname+" "+lname;
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
   var userid=user.uid;
@@ -510,7 +528,7 @@ var managers=[];
 managers.push(userid);
 var data={
 name: team,
-manager: managers,
+manager: managers
 };
 var updates={};
 updates['/teams/'+newTeamKey]=data;
@@ -527,10 +545,20 @@ firebase.database().ref("teams/"+team2).on('value', function(snapshot) {
 if(snapshot.val().name===team)
 {
 var members=snapshot.val().team;
+if(members!=null)
+{
 if(!members.includes(userid))
 {
 members.push(userid);
 snapshot.ref.update({"team": members});
+}
+
+}
+else
+{
+var members2=[];
+members2.push(userid);
+snapshot.ref.update({"team": members2});
 }
 }
 });
@@ -539,7 +567,7 @@ snapshot.ref.update({"team": members});
 
 user.updateProfile({
   displayName: name,
-  photoURL: photo
+  photoURL: photo2
 }).then(function() {
 var popup = document.getElementById("emailpopup");
   popup.classList.toggle("show");
@@ -548,8 +576,9 @@ if (manager)
 var popup=document.getElementById("teampopup");
 popup.classList.toggle("show");
 }
-alert("Registration complete");
-window.location.replace("home_user.html");
+
+var popup= document.getElementById("emailpopup");
+  popup.classList.toggle("show");
 }).catch(function(error) {
 
 });
@@ -557,7 +586,7 @@ window.location.replace("home_user.html");
   } else {
 
   }
-});
+}); 
 
 }
 else
@@ -600,6 +629,7 @@ popup.innerHTML="File is too big";
             filerdr.onload = function (e) {
                 $('#user_img').attr('src', e.target.result);
 		uploaded=1;
+              
             }
             filerdr.readAsDataURL(input.files[0]);
         }
@@ -627,6 +657,7 @@ function changeText() {
     if(exists==0)
     {
     var entry = document.createElement('li');
+    entry.style.width="595px";
     entry.appendChild(document.createTextNode(firstname));
     entry.setAttribute('id','item'+lastid);
     var removeButton = document.createElement('button');
