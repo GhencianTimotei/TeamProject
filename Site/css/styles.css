@@ -542,12 +542,12 @@ body {
   /*align-items: center;*/
 }
 
-#task_description {
+/*#task_description {
   height: 100px;
   width: 100%;
   border: 1px solid rgba(0,0,0,.2);
   overflow: scroll;
-}
+}*/
 
 .register_fields_row button {
   font-size: 18px;
@@ -954,10 +954,8 @@ hr {
   flex-direction: column;
 }
 .search_bar-container input{
-  width: 100%;
+  width: 98.5%;
 }
-
-
 
 .listWrapper {
   margin: 0 0 0 0;
@@ -995,9 +993,9 @@ hr {
   margin: 10px 0 0 0;
 }
 
-.task_description {
+.addTaskWrapper {
   display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
+  position: absolute;
   z-index: 1; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
@@ -1009,34 +1007,99 @@ hr {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-.task_description-container {
+.addTaskWrapper-container {
   background-color: #fefefe;
   margin: auto;
   padding: 20px;
   border: 1px solid #888;
-  width: 40%;
+  width: 80%;
   display: flex;
   flex-direction: column;
 }
-.task_description-container input{
+.addTaskWrapper-container input{
   width: 100%;
 }
 
-.task_description-container button {
-  background-color: #343a40;
-  color: white;
-  margin: 10px;
-  padding: 10px 10px 10px 10px;
-  text-transform: uppercase;
-  font-family: archivo_blackregular;
-  cursor: pointer;
-  margin-left: 50%;
-  transform: translate(-50%, 0px);
+/*.myTaskDetails {
+  display: none;
+}*/
 
+/* Popup container */
+.popupSearch {
+  /*position: relative;*/
+  cursor: pointer;
+  display: none;
 }
 
-.myTaskDetails {
-  display: none;
+.popupSearch .title {
+  margin:5px 0px;
+  font-size:25px;
+  font-weight:600;
+}
+
+/* The actual popup (appears on top) */
+.popupSearch .popuptext {
+  width: auto;
+  background-color: #212529;
+  color: #fff;
+  text-align: center;
+  font-size:18px;
+  font-weight:600;
+  border-radius: 6px;
+  padding: 8px 0;
+  /*position: absolute;*/
+  z-index: 1;
+}
+
+/* Toggle this class when clicking on the popup container (hide and show the popup) */
+.popupSearch .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s
+}
+/* Popup container */
+.popupCalendar {
+  /*position: relative;*/
+  cursor: pointer;
+  display: block;
+}
+
+.popupCalendar .title {
+  margin:5px 0px;
+  font-size:25px;
+  font-weight:600;
+}
+
+/* The actual popup (appears on top) */
+.popupCalendar .popuptext {
+  width: auto;
+  background-color: #212529;
+  color: #fff;
+  font-size:18px;
+  font-weight:600;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  /*position: absolute;*/
+  z-index: 1;
+}
+
+/* Toggle this class when clicking on the popup container (hide and show the popup) */
+.popupCalendar .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
 }
 
 .pw_prompt {

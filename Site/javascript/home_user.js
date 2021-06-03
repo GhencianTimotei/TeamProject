@@ -306,18 +306,20 @@ right_button.onclick = function () {
 };
 
 function displayDate() {
-    for (var i = 0; i < 7; i++) {
-        var span = document.getElementsByClassName("week_day_date")[i];
-        var day = date.getWeek()[i];
-        day.setDate(day.getDate() + 1);
-        span.innerHTML = (day.getDate()).toString() + " " + month_abr[day.getMonth()];
-        if (day.getDate() === current_date.getDate()  && day.getMonth() === current_date.getMonth() && day.getFullYear() === current_date.getFullYear()){
-            setDayToCurrent(i);
-        } else {
-            setDayToOrdinarry(i);
+   // firebase.database().ref().child("tasks").get().then((snapshot) => {
+        for (var i = 0; i < 7; i++) {
+            var span = document.getElementsByClassName("week_day_date")[i];
+            var day = date.getWeek()[i];
+            day.setDate(day.getDate() + 1);
+            span.innerHTML = (day.getDate()).toString() + " " + month_abr[day.getMonth()];
+            if (day.getDate() === current_date.getDate()  && day.getMonth() === current_date.getMonth() && day.getFullYear() === current_date.getFullYear()){
+                setDayToCurrent(i);
+            } else {
+                setDayToOrdinarry(i);
+            }
+            displayDayHours(/*snapshot.val(),*/day);
         }
-        displayDayHours(day);
-    }
+    //});
 }
 
 document.addEventListener('visibilitychange', function() {
@@ -339,11 +341,15 @@ function displayDayHours(day) {
         if (snapshot.val()["progress"][user_uid] != null) {
             for (var i = 0; i < 24; i++) {
                 var hour = document.createElement("P");
-                var hour_text = document.createTextNode((i < 10 ? "0" + (i).toString() : (i).toString()) + ":00");
+                var cTime = i < 10 ? "0" + (i).toString() : (i).toString();
+                var hour_text = document.createTextNode(cTime + ":00");
                 var container = document.createElement("DIV");
+                var newDay = day;
+                var currentTask = getTaskForCurrentTime(tasks, newDay.setHours(cTime))
                 hour.appendChild(hour_text);
                 auxDate.setHours(i);
                 container.setAttribute("class", "calendar_hours");
+                container.setAttribute("onclick", "displayTaskDetailsFromCalendar(" + JSON.stringify(currentTask) +")");
                 container.appendChild(hour);
                 if (snapshot.val()["progress"][user_uid][Math.floor(auxDate/1000)] != null) {
                     var task = document.createElement("P");
@@ -394,28 +400,48 @@ function displayDayHours(day) {
     });
 }
 
+function getTaskForCurrentTime (dbResponse, currentTime){
+    var tasks = dbResponse["details"];
+    for (const task in tasks) {
+        var currentFormattedTime = new Date(currentTime);
+        var currentFormattedTaskTime = getFormatTime(tasks[task].start_time);
+        if((currentFormattedTime.toLocaleDateString() === currentFormattedTaskTime.toLocaleDateString()) && (currentFormattedTime.toLocaleTimeString() === currentFormattedTaskTime.toLocaleTimeString())){
+            //console.log(tasks[task]);
+            return tasks[task];
+        } else {
+            return false;
+        }
+    }
+}
 
 
-var popup = document.getElementById("search_bar");
+var searchBar = document.getElementById("search_bar");
 
-var btn = document.getElementById("searchBtn");
+var searchBtn = document.getElementById("searchBtn");
 
 var closeBtn = document.getElementsByClassName("close")[0];
 
-btn.onclick = function () {
-    popup.style.display = "block";
-    popup.style.position = "absolute";
+searchBtn.onclick = function () {
+    searchBar.style.display = "block";
+    searchBar.style.position = "absolute";
     //console.log("test")
 };
 
 closeBtn.onclick = function() {
-    popup.style.display = "none";
+    searchBar.style.display = "none";
 }
 
 window.onclick = function(event) {
-    if (event.target == popup) {
-        popup.style.display = "none";
+    if (event.target == searchBar) {
+        searchBar.style.display = "none";
     }
+}
+
+var addTaskWrapper = document.getElementById("addTaskWrapper");
+
+var closeTaskDetailsBtn = document.getElementsByClassName("close")[1];
+closeTaskDetailsBtn.onclick = function() {
+    addTaskWrapper.style.display = "none";
 }
 
 var tasks=[];
@@ -425,94 +451,62 @@ tasksref.once('value').then(function(data) {
     data.forEach(function (test) {
         tasks.push(test.val());
     })
+    console.log(tasks)
     autocomplete_tasks(document.getElementById("tasks"), tasks);
 });
 
 function autocomplete_tasks(inp, arr) {
-    /*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
     var currentFocus;
-    /*execute a function when someone writes in the text field:*/
     inp.addEventListener("input", function(e) {
         var a, b, i, val = this.value;
-        /*close any already open lists of autocompleted values*/
         closeAllLists();
         if (!val) { return false;}
         if (!val) { return false;}
         currentFocus = -1;
-        /*empty the myTaskDetails div*/
         emptyMyTaskDetails();
-        /*create a DIV element that will contain the items (values):*/
         a = document.createElement("DIV");
         a.setAttribute("id", this.value + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
-        /*append the DIV element as a child of the autocomplete container:*/
         this.parentNode.appendChild(a);
-        /*for each item in the array...*/
         for (i = 0; i < arr.length; i++) {
-            /*check if the item starts with the same letters as the text field value:*/
             if (arr[i].task_title.substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-                /*create a DIV element for each matching element:*/
                 b = document.createElement("DIV");
                 var myTaskObject = JSON.stringify(arr[i]);
                 b.innerHTML += "<div onclick='displayTaskDetails(" + myTaskObject +")'>" + arr[i].task_title + "</div>";
-                /*execute a function when someone clicks on the item value (DIV element):*/
-                // b.addEventListener("click", function(e) {
-                //     /*insert the value for the autocomplete text field:*/
-                //     inp.value = this.getElementsByTagName("input")[0].value;
-                //     // changeText(val);
-                //     /*close the list of autocompleted values,
-                //     (or any other open lists of autocompleted values:*/
-                //     closeAllLists();
-                // });
                 a.appendChild(b);
             }
         }
     });
-    /*execute a function presses a key on the keyboard:*/
+
     inp.addEventListener("keydown", function(e) {
         var x = document.getElementById(this.id + "autocomplete-list");
         if (x) x = x.getElementsByTagName("div");
         if (e.keyCode == 40) {
-            /*If the arrow DOWN key is pressed,
-            increase the currentFocus variable:*/
             currentFocus++;
-            /*and and make the current item more visible:*/
             addActive(x);
         } else if (e.keyCode == 38) { //up
-            /*If the arrow UP key is pressed,
-            decrease the currentFocus variable:*/
             currentFocus--;
-            /*and and make the current item more visible:*/
             addActive(x);
         } else if (e.keyCode == 13) {
-            /*If the ENTER key is pressed, prevent the form from being submitted,*/
             e.preventDefault();
             if (currentFocus > -1) {
-                /*and simulate a click on the "active" item:*/
                 if (x) x[currentFocus].click();
             }
         }
     });
     function addActive(x) {
-        /*a function to classify an item as "active":*/
         if (!x) return false;
-        /*start by removing the "active" class on all items:*/
         removeActive(x);
         if (currentFocus >= x.length) currentFocus = 0;
         if (currentFocus < 0) currentFocus = (x.length - 1);
-        /*add class "autocomplete-active":*/
         x[currentFocus].classList.add("autocomplete-active");
     }
     function removeActive(x) {
-        /*a function to remove the "active" class from all autocomplete items:*/
         for (var i = 0; i < x.length; i++) {
             x[i].classList.remove("autocomplete-active");
         }
     }
     function closeAllLists(elmnt) {
-        /*close all autocomplete lists in the document,
-        except the one passed as an argument:*/
         var x = document.getElementsByClassName("autocomplete-items");
         for (var i = 0; i < x.length; i++) {
             if (elmnt != x[i] && elmnt != inp) {
@@ -520,33 +514,15 @@ function autocomplete_tasks(inp, arr) {
             }
         }
     }
-    /*execute a function when someone clicks in the document:*/
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });
 }
 
 
-
-function getUserTime(userID, startTime) {
-    var progressText;
-    var timesref = firebase.database().ref('tasks/progress/' + userID);
-    timesref.once('value').then(function(data) {
-        for (var i in data.val()) {
-            if(startTime !== i) {
-                var timeWorkedOnTask = timeDifference(startTime, i);
-                progressText += " -worked for :" + timeWorkedOnTask;
-            } else {
-                progressText += "User started at task progress at:" + startTime;
-            }
-        }
-        return progressText;
-    });
-}
-
 function emptyMyTaskDetails() {
 
-    var myTaskDetails = document.getElementsByClassName("myTaskDetails");
+    var popupSearch = document.getElementsByClassName("popupSearch");
     var taskTitle = document.getElementById("taskTitle");
     var taskDescription = document.getElementById("taskDescription");
     var responsibleUser = document.getElementById("responsibleUser");
@@ -569,22 +545,45 @@ function emptyMyTaskDetails() {
     progress.textContent = "";
     tasks.textContent = "";
 
-    myTaskDetails[0].style.display = "none";
+    popupSearch[0].style.display = "none";
+    popupSearch[0].style.display = "none";
 }
 
+
 function timeDifference(startTime,endTime) {
-    var differenceInMiliseconds = endTime - startTime;
-    var differenceInSeconds = differenceInMiliseconds / 1000;
+    var differenceInSeconds = (endTime - startTime) / 1000;
     var differenceInMinutes = differenceInSeconds / 60;
     var differenceInHours = differenceInMinutes / 60;
     return differenceInHours;
 }
 
-function displayTaskDetails (myTask) {
+function getFormatTime(d){
+    const startTime = new Date(d * 1000);
+    return startTime;
+}
 
-    var userTaskProgress = getUserTime(myTask.responsible_user, myTask.start_time);
+async function getUserTime(userID, startTime) {
+    var progressText = '';
 
-    var myTaskDetails = document.getElementsByClassName("myTaskDetails");
+    var timesref = firebase.database().ref('tasks/progress/' + userID);
+    await timesref.once('value').then(function(data) {
+        for (var i in data.val()) {
+            if(startTime == i) {
+                progressText += "User started working at: "  + getFormatTime(i).toLocaleDateString() + " " + getFormatTime(i).toLocaleTimeString();
+            } else {
+                var timeWorkedOnTask = timeDifference(getFormatTime(startTime), getFormatTime(i));
+                progressText += " - worked for: " + timeWorkedOnTask + " h, until " + getFormatTime(i).toLocaleDateString() + " " + getFormatTime(i).toLocaleTimeString();
+            }
+        }
+    });
+    return progressText;
+}
+
+async function displayTaskDetails (myTask) {
+
+    var userTaskProgress = await getUserTime(myTask.responsible_user, myTask.start_time);
+
+    var popupSearch = document.getElementsByClassName("popupSearch");
     var taskTitle = document.getElementById("taskTitle");
     var taskDescription = document.getElementById("taskDescription");
     var responsibleUser = document.getElementById("responsibleUser");
@@ -610,5 +609,34 @@ function displayTaskDetails (myTask) {
     progress.textContent = "Progress: " + userTaskProgress;
     tasks.value = myTask.task_title;
 
-    myTaskDetails[0].style.display = "block";
+    popupSearch[0].style.display = "block";
+}
+
+function tasksDetailsPopup(){
+    var popupSearch = document.getElementsByClassName("popupSearch");
+    popupSearch.classList.toggle("show");
+}
+
+function displayTaskDetailsFromCalendar(currentTask) {
+
+    var addTaskWrapper = document.getElementById("addTaskWrapper");
+    addTaskWrapper.style.display = "block";
+    addTaskWrapper.style.position = "absolute";
+
+    var taskTitle = document.getElementById("taskTitleCalendar");
+    var taskDescription = document.getElementById("taskDescriptionCalendar");
+    var responsibleUser = document.getElementById("responsibleUserCalendar");
+    var necessarySkills = document.getElementById("necessarySkillsCalendar");
+    var deadlineDate = document.getElementById("deadlineDateCalendar");
+    var priority = document.getElementById("priorityCalendar");
+    var noHoursToWork = document.getElementById("noHoursToWorkCalendar");
+
+    taskTitle.textContent = "Task title: " + currentTask.task_title;
+    taskDescription.textContent = "Task description: " + currentTask.task_description;
+    responsibleUser.textContent = "Responsible user: " + currentTask.responsible_user;
+    necessarySkills.textContent = "Necessary skills: " + currentTask.necessary_skills;
+    deadlineDate.textContent = "Deadline date: " + currentTask.deadline_date.day + " " + currentTask.deadline_date.month + " " + currentTask.deadline_date.year;
+    priority.textContent = "Priority: " + currentTask.priority;
+    noHoursToWork.textContent = "Number of hours to work: " + currentTask.no_hours_to_work;
+
 }

@@ -130,10 +130,14 @@
 
 </div>
 
-    <div id="search_bar" class="search_bar">
-      <div class="search_bar-container">
-        <span class="close">&times;</span>
-        <div class="myTaskDetails">
+  <div id="search_bar" class="search_bar">
+    <div class="search_bar-container">
+      <span class="close">&times;</span>
+      <div class="popupSearch" onclick="tasksDetailsPopup()">
+        <div class="popuptext">
+          <div class="title">
+            TASK DETAILS
+          </div>
           <span id="taskTitle"></span><br>
           <span id="taskDescription"></span><br>
           <span id="responsibleUser"></span><br>
@@ -144,14 +148,14 @@
           <span id="noHoursToWork"></span><br>
           <span id="progress"></span><br>
         </div>
-        <div class="search_fields_row choose_skills">
-
-          <div id="listwrapper" style="width: 100%" class="listWrapper">
-            <input type="text" autocomplete="off" id="tasks" name="tasks" placeholder="Search Tasks"></input>
-          </div>
+      </div>
+      <div class="search_fields_row choose_skills">
+        <div id="listwrapper" style="width: 100%" class="listWrapper">
+          <input type="text" autocomplete="off" id="tasks" name="tasks" placeholder="Search Tasks"></input>
         </div>
       </div>
     </div>
+  </div>
   <div id="notification_popup" class="search_bar">
     <div class="search_bar-container">
       <span class="close" id="close_notifications">&times;</span>
@@ -160,14 +164,27 @@
       </div>
     </div>
   </div>
-    <div id="task_description" class="task_description">
-      <div class="task_description-container">
-        <span class="close">&times;</span>
-        <div class="task_description_fields_row choose_tasks">
-          <p>Task details</p>
+
+  <div id="addTaskWrapper" class="addTaskWrapper">
+    <div class="addTaskWrapper-container">
+      <span class="close">&times;</span>
+      <div class="popupCalendar">
+        <div class="popuptext">
+          <div class="title">
+            TASK DETAILS
+          </div>
+          <span id="taskTitleCalendar"></span><br>
+          <span id="taskDescriptionCalendar"></span><br>
+          <span id="responsibleUserCalendar"></span><br>
+          <span id="necessarySkillsCalendar"></span><br>
+          <span id="deadlineDateCalendar"></span><br>
+          <span id="priorityCalendar"></span><br>
+          <span id="noHoursToWorkCalendar"></span><br>
         </div>
       </div>
     </div>
+  </div>
+
     <script src="javascript/sidebars.js"></script>
     <script src="javascript/home_user.js"></script>
 <!--<div class="notification_tag" id="notification body">-->
