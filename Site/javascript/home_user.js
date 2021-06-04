@@ -345,21 +345,24 @@ function displayDayHours(snapshotVal,day) {
                 var hour_text = document.createTextNode(cTime + ":00");
                 var container = document.createElement("DIV");
                 var newDay = day;
-                var currentTask = getTaskForCurrentTime(tasks, newDay.setHours(cTime))
+                //var currentTask = getTaskForCurrentTime(tasks, newDay.setHours(cTime));
+                var currentTask = null;
+                if (snapshot.val()["progress"][user_uid][Math.floor(auxDate/1000)] != null) {
+                    var taskUid = snapshot.val()["progress"][user_uid][Math.floor(auxDate/1000)];
+                    currentTask = snapshot.val()["details"][taskUid];
+                }
                 hour.appendChild(hour_text);
                 auxDate.setHours(i);
                 container.setAttribute("class", "calendar_hours");
                 container.setAttribute("onclick", "displayTaskDetailsFromCalendar(" + JSON.stringify(currentTask) +")");
                 container.appendChild(hour);
-                if (snapshot.val()["progress"][user_uid][Math.floor(auxDate/1000)] != null) {
+                if (currentTask) {
                     var task = document.createElement("P");
-                    var taskUid = snapshot.val()["progress"][user_uid][Math.floor(auxDate/1000)]
-                    var taskDetails = snapshot.val()["details"][taskUid]
 
-                    var task_label = document.createTextNode(taskDetails["task_title"]);
+                    var task_label = document.createTextNode(currentTask["task_title"]);
                     task.appendChild(task_label);
                     task.setAttribute("class", "task_label");
-                    container.classList.add("prio" + taskDetails["priority"]);
+                    container.classList.add("prio" + currentTask["priority"]);
                     container.appendChild(task);
                 }
                 if (day.getDate() === current_date.getDate() && day.getMonth() === current_date.getMonth() && day.getFullYear() === current_date.getFullYear() && i === current_date.getHours()) {
@@ -400,8 +403,7 @@ function displayDayHours(snapshotVal,day) {
     });
 }
 
-function getTaskForCurrentTime (dbResponse, currentTime){
-    var tasks = dbResponse["details"];
+function getTaskForCurrentTime (tasks, currentTime){
     for (const task in tasks) {
         var currentFormattedTime = new Date(currentTime);
         var currentFormattedTaskTime = getFormatTime(tasks[task].start_time);
@@ -439,7 +441,7 @@ window.onclick = function(event) {
 
 var addTaskWrapper = document.getElementById("addTaskWrapper");
 
-var closeTaskDetailsBtn = document.getElementsByClassName("close")[1];
+var closeTaskDetailsBtn = document.querySelector(".addTaskWrapper-container .close");
 closeTaskDetailsBtn.onclick = function() {
     addTaskWrapper.style.display = "none";
 }
