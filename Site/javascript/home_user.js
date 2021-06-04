@@ -306,7 +306,7 @@ right_button.onclick = function () {
 };
 
 function displayDate() {
-   // firebase.database().ref().child("tasks").get().then((snapshot) => {
+   firebase.database().ref().child("tasks").get().then((snapshot) => {
         for (var i = 0; i < 7; i++) {
             var span = document.getElementsByClassName("week_day_date")[i];
             var day = date.getWeek()[i];
@@ -317,9 +317,9 @@ function displayDate() {
             } else {
                 setDayToOrdinarry(i);
             }
-            displayDayHours(/*snapshot.val(),*/day);
+            displayDayHours(snapshot.val(),day);
         }
-    //});
+    });
 }
 
 document.addEventListener('visibilitychange', function() {
@@ -333,7 +333,7 @@ document.addEventListener('visibilitychange', function() {
 });
 
 
-function displayDayHours(day) {
+function displayDayHours(snapshotVal,day) {
     // console.log(day);
     var auxDate = day;
     auxDate.setMinutes(0); auxDate.setSeconds(0);auxDate.setHours(0);
@@ -368,7 +368,7 @@ function displayDayHours(day) {
                     container.classList.remove("calendar_hours_ordinarry");
                 }
                 if (i > 0) {
-                    console.log(day.get )
+                    console.log(day.get);
                     document.getElementsByClassName("calendar_hours_days")[day.getDay() == 0 ? 6 : day.getDay() - 1].appendChild(container);
                 } else {
                     document.getElementsByClassName("calendar_hours_days")[day.getDay() == 0 ? 6 : day.getDay() - 1].innerText = "";
